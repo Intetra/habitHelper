@@ -3,12 +3,10 @@ import { View, Text, StyleSheet, Alert} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as firebase from 'firebase';
 import {loggingOut} from '../api/firebaseMethods';
-import { CommonActions } from '@react-navigation/native';
 
-export default function Dashboard({ navigation }) {
+export default function Account({ navigation }) {
   let currentUserUID = firebase.auth().currentUser.uid;
   const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
 
   useEffect(() => {
     async function getUserInfo(){
@@ -24,7 +22,6 @@ export default function Dashboard({ navigation }) {
         } else {
           let dataObj = doc.data();
           setFirstName(dataObj.firstName)
-          setLastName(dataObj.lastName)
         }
       } catch (err){
       Alert.alert('There is an error.', err.message)
@@ -35,20 +32,13 @@ export default function Dashboard({ navigation }) {
 
   const handlePress = () => {
     loggingOut();
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 1,
-        routes: [
-          {name: 'Home'}
-        ]
-      })
-    )
+    navigation.replace('Home');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Dashboard</Text>
-      <Text style={styles.text}>Hi {firstName} {lastName}</Text>
+      <Text style={styles.titleText}>Account</Text>
+      <Text style={styles.text}>Hi {firstName}</Text>
       <TouchableOpacity style={styles.button} onPress={handlePress}>
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>

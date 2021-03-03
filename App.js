@@ -8,6 +8,7 @@ import SignUp from './src/screens/SignUp';
 import SignIn from './src/screens/SignIn';
 import LoadingScreen from './src/screens/LoadingScreen';
 import Dashboard from './src/screens/Dashboard';
+import Account from './src/screens/Account'
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ export default function App() {
         <Stack.Screen name='Sign Up' component={SignUp} options={{ headerShown: true }}/>
         <Stack.Screen name='Sign In' component={SignIn} options={{ headerShown: true }}/>
         <Stack.Screen name={'Dashboard'} component={Dashboard} options={{ headerShown: false }} />
+        <Stack.Screen name={'Account'} component={Account} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
