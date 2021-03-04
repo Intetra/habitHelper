@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Alert} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as firebase from 'firebase';
-import {loggingOut} from '../api/firebaseMethods';
-import { CommonActions } from '@react-navigation/native';
 
 export default function Dashboard({ navigation }) {
   let currentUserUID = firebase.auth().currentUser.uid;
@@ -34,24 +32,13 @@ export default function Dashboard({ navigation }) {
   })
 
   const handlePress = () => {
-    loggingOut();
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 1,
-        routes: [
-          {name: 'Home'}
-        ]
-      })
-    )
+    navigation.navigate('Account');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.titleText}>Dashboard</Text>
       <Text style={styles.text}>Hi {firstName} {lastName}</Text>
-      <TouchableOpacity style={styles.button} onPress={handlePress}>
-        <Text style={styles.buttonText}>Log Out</Text>
-      </TouchableOpacity>
     </View>
   )
 }
