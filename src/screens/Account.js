@@ -3,32 +3,10 @@ import { View, Text, StyleSheet, Alert} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as firebase from 'firebase';
 import {loggingOut} from '../api/firebaseMethods';
+import getUserInfo from '../customHooks/getUserInfo'
 
 export default function Account({ navigation }) {
   let currentUserUID = firebase.auth().currentUser.uid;
-  const [firstName, setFirstName] = useState('');
-
-  useEffect(() => {
-    async function getUserInfo(){
-      try {
-        let doc = await firebase
-          .firestore()
-          .collection('users')
-          .doc(currentUserUID)
-          .get();
-
-        if (!doc.exists){
-          Alert.alert('No user data found!')
-        } else {
-          let dataObj = doc.data();
-          setFirstName(dataObj.firstName)
-        }
-      } catch (err){
-      Alert.alert('There is an error.', err.message)
-      }
-    }
-    getUserInfo();
-  })
 
   const handlePress = () => {
     loggingOut();
@@ -38,7 +16,7 @@ export default function Account({ navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.titleText}>Account</Text>
-      <Text style={styles.text}>Hi {firstName}</Text>
+      <Text style={styles.text}>Hi!</Text>
       <TouchableOpacity style={styles.button} onPress={handlePress}>
         <Text style={styles.buttonText}>Log Out</Text>
       </TouchableOpacity>

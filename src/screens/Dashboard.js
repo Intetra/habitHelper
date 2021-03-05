@@ -1,84 +1,61 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert} from 'react-native';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import * as firebase from 'firebase';
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, Alert, FlatList } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import * as firebase from "firebase";
+import { Entypo } from "@expo/vector-icons";
+import getUserInfo from "../customHooks/getUserInfo";
 
 export default function Dashboard({ navigation }) {
-  let currentUserUID = firebase.auth().currentUser.uid;
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  let uid = firebase.auth().currentUser.uid;
+  const [info, setInfo] = useState({ email: "", firstName: "", lastName: "" });
 
-  useEffect(() => {
-    async function getUserInfo(){
-      try {
-        let doc = await firebase
-          .firestore()
-          .collection('users')
-          .doc(currentUserUID)
-          .get();
-
-        if (!doc.exists){
-          Alert.alert('No user data found!')
-        } else {
-          let dataObj = doc.data();
-          setFirstName(dataObj.firstName)
-          setLastName(dataObj.lastName)
-        }
-      } catch (err){
-      Alert.alert('There is an error.', err.message)
-      }
-    }
-    getUserInfo();
-  })
-
-  const handlePress = () => {
-    navigation.navigate('Account');
+  const getInfo = async () => {
+    setInfo(await getUserInfo(uid));
   };
 
+  useEffect(() => {
+    getInfo();
+  }, []);
+
+  useEffect(() => {
+    console.log(info);
+  }, [info]);
+
+  const handlePress = () => {
+    Alert.alert("Pressed");
+  };
+
+  const { container, titleText, button, listStyle } = styles;
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.titleText}>Dashboard</Text>
-      <Text style={styles.text}>Hi {firstName} {lastName}</Text>
+    <View style={container}>
+      <Text style={titleText}>Dashboard</Text>
+      <FlatList style={listStyle} />
+      <TouchableOpacity style={button} onPress={handlePress}>
+        <Entypo name="add-to-list" size={40} color="white" />
+      </TouchableOpacity>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    width: 150,
-    padding: 5,
-    backgroundColor: '#ff9999',
-    borderWidth: 2,
-    borderColor: 'white',
-    borderRadius: 15,
-    alignSelf: 'center',
-  },
-  buttonText: {
-    fontSize:20,
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
   container: {
-    height: '100%',
-    width: '100%',
-    backgroundColor: '#3FC5AB',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    textAlign: 'center',
-    fontSize: 20,
-    fontStyle: 'italic',
-    marginTop: '2%',
-    marginBottom: '10%',
-    fontWeight: 'bold',
-    color: 'black',
+    flex: 1,
+    flexDirection: "column",
+    alignItems: "center",
+    padding: 20,
   },
   titleText: {
-    textAlign: 'center',
-    fontSize: 30,
-    fontWeight: 'bold',
-    color: '#2E6194',
+    fontSize: 32,
+    color: "blue",
+  },
+  listStyle: {},
+  button: {
+    padding: 20,
+    borderRadius: 50,
+    backgroundColor: "blue",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
