@@ -4,35 +4,21 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { Entypo } from "@expo/vector-icons";
 import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
+import getHabits from '../customHooks/getHabits'
 
 export default function Dashboard({ navigation }) {
-  let uid = firebase.auth().currentUser.uid;
   const [habits, setHabits] = useState([]);
+
   useEffect(() => {
-    //fetch an array of habits or throw an error
     const fetch = async () => {
-      try {
-        let h = await firebase.firestore().collection(`/users/${uid}/habits`).get();
-
-        return h.docs.map((doc) => Object.assign({ uid: doc.id }, doc.data()));
-      } catch (err) {
-        Alert.alert("There is an error.", err.message);
-      }
+      setHabits(await getHabits());
     };
-
-    //handler to update habits state with results of fetch
-    const updateHabits = async () => {
-      setHabits(await fetch());
-    };
-
-    //call handler
-    updateHabits();
+    fetch();
   }, [])
 
 
   //flatlist renderItem handler
   const renderHabit = (prop) => {
-    console.log(prop);
     return (
       <Habit
         title={prop.item.name}
@@ -42,9 +28,9 @@ export default function Dashboard({ navigation }) {
     );
   };
 
+  //
   const HabitList = () => {
     return (
-      <View>
         <FlatList
           data={habits}
           renderItem={(habit) => renderHabit(habit)}
@@ -52,7 +38,6 @@ export default function Dashboard({ navigation }) {
             return index.toString();
           }}
         />
-      </View>
     );
   };
 

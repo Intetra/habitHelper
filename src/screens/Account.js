@@ -8,12 +8,10 @@ export default function Account({ navigation }) {
   const [info, setInfo] = useState({ email: "", firstName: "", lastName: "" });
 
   useEffect(() => {
-    if (!info.email.length) {
       const getInfo = async () => {
         setInfo(await getUserInfo());
       };
       getInfo();
-    }
   }, []);
 
   const handlePress = () => {
