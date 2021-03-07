@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Alert, ScrollView, Keyboard ,StyleSheet, SafeAreaView} from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { registration } from '../api/firebaseMethods';
+import { registration } from '../../api/firebaseMethods';
 
 export default function SignUp({ navigation }) {
   const [firstName, setFirstName] = useState('');

@@ -4,10 +4,10 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as firebase from "firebase";
 import firebaseConfig from "./src/api/firebaseConfig";
-import WelcomeScreen from "./src/screens/WelcomeScreen";
-import SignUp from "./src/screens/SignUp";
-import SignIn from "./src/screens/SignIn";
-import LoadingScreen from "./src/screens/LoadingScreen";
+import WelcomeScreen from "./src/screens/authFlow/WelcomeScreen";
+import SignUp from "./src/screens/authFlow/SignUp";
+import SignIn from "./src/screens/authFlow/SignIn";
+import LoadingScreen from "./src/screens/authFlow/LoadingScreen";
 import DashboardNavigator from "./src/middleware/DashboardNavigator";
 import Account from "./src/screens/Account";
 

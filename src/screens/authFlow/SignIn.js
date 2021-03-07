@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, StyleSheet, Alert } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { signIn } from "../api/firebaseMethods";
+import { signIn } from "../../api/firebaseMethods";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
