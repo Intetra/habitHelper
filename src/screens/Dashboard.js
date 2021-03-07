@@ -5,7 +5,7 @@ import { Entypo } from "@expo/vector-icons";
 import * as firebase from "firebase/app";
 
 export default function Dashboard({ navigation }) {
-  const [projects, setProjects] = useState([])
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     const getProjects = async () => {
@@ -14,29 +14,46 @@ export default function Dashboard({ navigation }) {
         let doc = await firebase
           .firestore()
           .collection(`/users/${uid}/projects`)
-          .get()
+          .get();
 
-          return doc.docs.map(doc => doc.data())
-
-
+        return doc.docs.map((doc) => doc.data());
       } catch (err) {
         Alert.alert("There is an error.", err.message);
       }
-
-    }
+    };
     const updateProjects = async () => {
       setProjects(await getProjects());
-    }
-    updateProjects()
+    };
+    updateProjects();
   }, []);
 
-  useEffect(() => {
-    projects.forEach((project) => {
-      console.log(project)
-    })
-  })
+  const DATA = [];
+  projects.forEach((project) => {
+    DATA.push(project);
+  });
 
+  const renderProject = (prop) => {
+    console.log(prop);
+    return (
+      <View>
+        <Text>{prop.item.name}</Text>
+      </View>
+    );
+  };
 
+  const ProjectList = () => {
+    return (
+      <View>
+        <FlatList
+          data={DATA}
+          renderItem={(item) => renderProject(item)}
+          keyExtractor={(item, index) => {
+            return index.toString();
+          }}
+        />
+      </View>
+    );
+  };
 
   const handlePress = () => {
     Alert.alert("Pressed");
@@ -47,7 +64,7 @@ export default function Dashboard({ navigation }) {
   return (
     <View style={container}>
       <Text style={titleText}>Dashboard</Text>
-      <FlatList style={listStyle} />
+      <ProjectList style={listStyle} />
       <TouchableOpacity style={button} onPress={handlePress}>
         <Entypo name="add-to-list" size={40} color="white" />
       </TouchableOpacity>
