@@ -6,28 +6,29 @@ import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
 
 export default function Dashboard({ navigation }) {
+  let uid = firebase.auth().currentUser.uid;
   const [habits, setHabits] = useState([]);
-
-  //fetch habit from firestore
   useEffect(() => {
-    const getHabits = async () => {
-      let uid = firebase.auth().currentUser.uid;
+    //fetch an array of habits or throw an error
+    const fetch = async () => {
       try {
-        let h = await firebase
-          .firestore()
-          .collection(`/users/${uid}/habits`)
-          .get();
+        let h = await firebase.firestore().collection(`/users/${uid}/habits`).get();
 
         return h.docs.map((doc) => Object.assign({ uid: doc.id }, doc.data()));
       } catch (err) {
         Alert.alert("There is an error.", err.message);
       }
     };
+
+    //handler to update habits state with results of fetch
     const updateHabits = async () => {
-      setHabits(await getHabits());
+      setHabits(await fetch());
     };
+
+    //call handler
     updateHabits();
-  }, []);
+  }, [])
+
 
   //flatlist renderItem handler
   const renderHabit = (prop) => {
@@ -37,7 +38,6 @@ export default function Dashboard({ navigation }) {
         title={prop.item.name}
         id={prop.item.uid}
         details={prop.item.details}
-
       />
     );
   };
