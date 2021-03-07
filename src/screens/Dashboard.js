@@ -11,12 +11,12 @@ export default function Dashboard({ navigation }) {
     const getProjects = async () => {
       let uid = firebase.auth().currentUser.uid;
       try {
-        let doc = await firebase
+        let projects = await firebase
           .firestore()
           .collection(`/users/${uid}/projects`)
           .get();
 
-        return doc.docs.map((doc) => doc.data());
+        return projects.docs.map((doc) => doc.data());
       } catch (err) {
         Alert.alert("There is an error.", err.message);
       }
@@ -35,9 +35,9 @@ export default function Dashboard({ navigation }) {
   const renderProject = (prop) => {
     console.log(prop);
     return (
-      <View>
-        <Text>{prop.item.name}</Text>
-      </View>
+      <TouchableOpacity style={styles.projectHolder}>
+        <Text style={styles.projectName}>{prop.item.name}</Text>
+      </TouchableOpacity>
     );
   };
 
@@ -59,37 +59,44 @@ export default function Dashboard({ navigation }) {
     Alert.alert("Pressed");
   };
 
-  const { container, titleText, button, listStyle } = styles;
+  const { container, buttonHolder, button, listStyle } = styles;
 
   return (
     <View style={container}>
-      <Text style={titleText}>Dashboard</Text>
       <ProjectList style={listStyle} />
+      <View style={buttonHolder}>
       <TouchableOpacity style={button} onPress={handlePress}>
         <Entypo name="add-to-list" size={40} color="white" />
       </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: '100%',
     flexDirection: "column",
     alignItems: "center",
-    padding: 20,
+    padding: 40,
+    paddingBottom: 100
   },
-  titleText: {
-    fontSize: 32,
-    color: "blue",
+  buttonHolder: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
-  listStyle: {},
   button: {
+    width: 80,
     padding: 20,
     borderRadius: 50,
     backgroundColor: "blue",
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
+  projectHolder: {},
+  projectName: {
+    fontSize: 40,
+    color: 'red'
+  }
 });
