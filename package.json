@@ -28,7 +28,7 @@
     "@babel/core": "~7.9.0"
   },
   "private": true,
-  "name": "habithelper",
+  "name": "habitHelper",
   "description": "React Native Application for building habits",
   "version": "1.0.0",
   "repository": {

@@ -1,9 +1,9 @@
 import React from 'react'
 import {Alert} from 'react-native';
-import * as firebase from 'firebase';
+import * as firebase from 'firebase/app';
 
-const getUserInfo = async (uid) => {
-  console.log('inside getUserInfo')
+const getUserInfo = async () => {
+  let uid = firebase.auth().currentUser.uid;
   try {
     let doc = await firebase
       .firestore()
@@ -14,8 +14,7 @@ const getUserInfo = async (uid) => {
     if (!doc.exists){
       Alert.alert('No user data found!')
     } else {
-      let dataObj = doc.data();
-      return dataObj
+      return doc.data();
     }
   } catch (err){
   Alert.alert('There is an error.', err.message)

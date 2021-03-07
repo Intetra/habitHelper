@@ -1,25 +1,40 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert, FlatList } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import * as firebase from "firebase";
 import { Entypo } from "@expo/vector-icons";
-import getUserInfo from "../customHooks/getUserInfo";
+import * as firebase from "firebase/app";
 
 export default function Dashboard({ navigation }) {
-  let uid = firebase.auth().currentUser.uid;
-  const [info, setInfo] = useState({ email: "", firstName: "", lastName: "" });
-
-  const getInfo = async () => {
-    setInfo(await getUserInfo(uid));
-  };
+  const [projects, setProjects] = useState([])
 
   useEffect(() => {
-    getInfo();
+    const getProjects = async () => {
+      let uid = firebase.auth().currentUser.uid;
+      try {
+        let doc = await firebase
+          .firestore()
+          .collection(`/users/${uid}/projects`)
+          .get()
+
+          return doc
+
+
+      } catch (err) {
+        Alert.alert("There is an error.", err.message);
+      }
+
+    }
+    const updateProjects = async () => {
+      setProjects(await getProjects());
+    }
+    updateProjects()
   }, []);
 
   useEffect(() => {
-    console.log(info);
-  }, [info]);
+    console.log(projects)
+  })
+
+
 
   const handlePress = () => {
     Alert.alert("Pressed");
