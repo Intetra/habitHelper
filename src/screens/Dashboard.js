@@ -16,7 +16,7 @@ export default function Dashboard({ navigation }) {
           .collection(`/users/${uid}/projects`)
           .get()
 
-          return doc
+          return doc.docs.map(doc => doc.data())
 
 
       } catch (err) {
@@ -31,7 +31,9 @@ export default function Dashboard({ navigation }) {
   }, []);
 
   useEffect(() => {
-    console.log(projects)
+    projects.forEach((project) => {
+      console.log(project)
+    })
   })
 
 
