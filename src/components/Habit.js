@@ -14,7 +14,7 @@ const Habit = (props) => {
     return (
       <TouchableOpacity style={styles.container} onPress={() => handlePress()}>
         <Text style={titleStyle}>{title}</Text>
-        <Text style={idStyle}>{id}</Text>
+        <Text style={idStyle}>ID: {id}</Text>
         <Text style={detailsStyle}>{details}</Text>
       </TouchableOpacity>
     );
@@ -31,10 +31,13 @@ const Habit = (props) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     flexDirection: 'column',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderRadius: 5,
+    margin: 5,
+    padding: 5
   },
   titleStyle: {
     fontSize: 40,
@@ -42,7 +45,7 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   idStyle: {
-    fontSize: 20,
+    fontSize: 12,
     margin: 5,
   },
   detailsStyle: {
