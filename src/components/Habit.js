@@ -1,28 +1,41 @@
-import React from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native'
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 
 const Habit = (props) => {
-  const { title, id, details } = props
-  const { titleStyle, idStyle, detailsStyle } = styles
+  const { title, id, details } = props;
+  const { titleStyle, idStyle, detailsStyle } = styles;
+  const [ expanded, setExpanded ] = useState(false);
 
   const handlePress = () => {
-    Alert.alert("Habit pressed.");
+    setExpanded(!expanded);
   };
 
-  return (
-    <TouchableOpacity
-      style={styles.habitHolder}
-      onPress={() => handlePress()}
-    >
-      <Text style={titleStyle}>{title}</Text>
-      <Text style={idStyle}>ID: {id}</Text>
-      <Text style={detailsStyle}>{details}</Text>
-    </TouchableOpacity>
-  )
-}
+  if (expanded) {
+    return (
+      <TouchableOpacity style={styles.container} onPress={() => handlePress()}>
+        <Text style={titleStyle}>{title}</Text>
+        <Text style={idStyle}>{id}</Text>
+        <Text style={detailsStyle}>{details}</Text>
+      </TouchableOpacity>
+    );
+  } else {
+    return (
+      <TouchableOpacity style={styles.container} onPress={() => handlePress()}>
+        <Text style={titleStyle}>{title}</Text>
+      </TouchableOpacity>
+    )
+  }
+
+
+};
 
 const styles = StyleSheet.create({
-  container: {},
+  container: {
+    flex: 1,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
   titleStyle: {
     fontSize: 40,
     color: "tomato",
@@ -30,11 +43,11 @@ const styles = StyleSheet.create({
   },
   idStyle: {
     fontSize: 20,
-    margin: 5
+    margin: 5,
   },
   detailsStyle: {
     fontSize: 30,
-  }
-})
+  },
+});
 
-export default Habit
+export default Habit;
