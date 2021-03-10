@@ -83,6 +83,28 @@ export async function createHabit(title, details) {
   }
 }
 
+export async function updateHabit(id, title, details) {
+  if (id, title) {
+    console.log(details)
+    try {
+      let uid = firebase.auth().currentUser.uid;
+      const db = firebase.firestore();
+      db.collection("users")
+        .doc(uid)
+        .collection("habits")
+        .doc(id)
+        .set({
+          title,
+          details
+        })
+    } catch (err) {
+      Alert.alert("There is something wrong!", err.message);
+    }
+  } else {
+    Alert.alert("There is something wrong!");
+  }
+}
+
 export async function deleteHabit(id) {
   if (id) {
     try {

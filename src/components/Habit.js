@@ -1,12 +1,22 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native";
-import { deleteHabit } from "../api/firebaseMethods";
-import { AntDesign } from "@expo/vector-icons";
+import { deleteHabit, updateHabit } from "../api/firebaseMethods";
+import { AntDesign, Feather } from "@expo/vector-icons";
+import EditModal from '../screens/habitCRUD/EditModal'
 
 const Habit = (props) => {
   const { title, id, details, habitGetter } = props;
   const { titleStyle, idStyle, detailsStyle, titleHolder } = styles;
   const [expanded, setExpanded] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const updateModalVisible = () => {
+    if (modalVisible) {
+      setModalVisible(false);
+    } else {
+      setModalVisible(true);
+    }
+  };
 
   const handlePress = () => {
     setExpanded(!expanded);
@@ -17,11 +27,21 @@ const Habit = (props) => {
     habitGetter();
   };
 
+  const handleUpdate = () => {
+    setModalVisible(true)
+  };
+
   if (expanded) {
     return (
       <TouchableOpacity style={styles.container} onPress={() => handlePress()}>
         <View style={titleHolder}>
           <Text style={titleStyle}>{title}</Text>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => handleUpdate(id, title, details)}
+          >
+            <Feather name="edit" size={24} color="blue" />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.closeButton}
             onPress={() => handleDelete(id)}
@@ -31,6 +51,18 @@ const Habit = (props) => {
         </View>
         <Text style={idStyle}>ID: {id}</Text>
         <Text style={detailsStyle}>{details}</Text>
+        <EditModal
+          id={id}
+          title={title}
+          details={details}
+          modalVisible={modalVisible}
+          habitGetter={() => {
+            habitGetter()
+          }}
+          updateModalVisible={() => {
+            updateModalVisible()
+          }}
+        />
       </TouchableOpacity>
     );
   } else {
@@ -72,6 +104,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.05)',
     justifyContent: "center",
     alignItems: "center",
+    margin: 10
   },
   idStyle: {
     fontSize: 12,
