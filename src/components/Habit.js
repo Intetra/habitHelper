@@ -22,9 +22,11 @@ const Habit = (props) => {
     setExpanded(!expanded);
   };
 
-  const handleDelete = (id) => {
-    deleteHabit(id);
-    habitGetter();
+  const handleDelete = async (id) => {
+    await deleteHabit(id).then(() => {
+      habitGetter();
+    })
+
   };
 
   const handleUpdate = () => {
@@ -99,8 +101,8 @@ const styles = StyleSheet.create({
       Math.round(
         Dimensions.get("window").width + Dimensions.get("window").height
       ) / 2,
-    width: Dimensions.get("window").width * 0.08,
-    height: Dimensions.get("window").width * 0.08,
+    width: Dimensions.get("window").width * 0.09,
+    height: Dimensions.get("window").width * 0.09,
     backgroundColor: 'rgba(0,0,0,0.05)',
     justifyContent: "center",
     alignItems: "center",
