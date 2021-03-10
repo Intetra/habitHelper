@@ -7,13 +7,14 @@ import {
   View,
   TextInput,
   TouchableOpacity,
+  Dimensions
 } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import { updateHabit } from '../../api/firebaseMethods'
 
 export default function EditModal(props) {
-  const { id, title, details, modalVisible, updateModalVisible, habitGetter } = props;
-  const { centeredView, modalView, textStyle, openButton } = styles;
+  const { id, title, details, modalVisible, updateModalVisible, navigation } = props;
+  const { centeredView, modalView, openButton } = styles;
 
   const EditHabitForm = () => {
     const [newTitle, setNewTitle] = useState(title);
@@ -28,7 +29,7 @@ export default function EditModal(props) {
         updateHabit(id, newTitle, newDetails);
         emptyState();
         updateModalVisible();
-        habitGetter();
+        navigation.navigate('Loading');
     };
 
     return (
@@ -65,9 +66,7 @@ export default function EditModal(props) {
                 updateModalVisible();
               }}
             >
-              <Text style={textStyle}>
                 <AntDesign name="close" size={24} color="white" />
-              </Text>
             </TouchableHighlight>
           </View>
         </View>
@@ -103,14 +102,16 @@ const styles = StyleSheet.create({
   },
   openButton: {
     backgroundColor: "red",
-    borderRadius: 20,
-    padding: 10,
+    borderRadius:
+      Math.round(
+        Dimensions.get("window").width + Dimensions.get("window").height
+      ) / 2,
+    width: Dimensions.get("window").width * 0.15,
+    height: Dimensions.get("window").width * 0.15,
+    justifyContent: 'center',
+    alignItems: 'center',
     elevation: 2,
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+    marginTop: 10
   },
   modalText: {
     marginBottom: 15,
@@ -131,7 +132,8 @@ const styles = StyleSheet.create({
     width: '100%',
     flex: 1,
     borderWidth: 2,
-    marginBottom: 5
+    marginBottom: 5,
+    borderRadius: 10
   },
   textInput2: {
     flex: 4,

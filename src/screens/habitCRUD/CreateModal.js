@@ -16,8 +16,8 @@ import { AntDesign } from '@expo/vector-icons';
 import { createHabit } from '../../api/firebaseMethods'
 
 export default function CreateModal(props) {
-  const { modalVisible, updateModalVisible, habitGetter } = props;
-  const { centeredView, modalView, textStyle, openButton, container } = styles;
+  const { modalVisible, updateModalVisible, habitGetter, currentDate } = props;
+  const { centeredView, modalView, closeButton, openButton } = styles;
 
   const CreateHabitForm = () => {
     const [title, setTitle] = useState("");
@@ -32,7 +32,7 @@ export default function CreateModal(props) {
       if (!title) {
         Alert.alert("Title is required");
       } else {
-        createHabit(title, details);
+        createHabit(title, details, currentDate);
         emptyState();
         updateModalVisible();
         habitGetter();
@@ -73,7 +73,7 @@ export default function CreateModal(props) {
                 updateModalVisible();
               }}
             >
-              <Text style={textStyle}>
+              <Text style={closeButton}>
                 <AntDesign name="close" size={24} color="white" />
               </Text>
             </TouchableHighlight>
@@ -115,10 +115,18 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 2,
   },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
+  openButton: {
+    backgroundColor: "red",
+    borderRadius:
+      Math.round(
+        Dimensions.get("window").width + Dimensions.get("window").height
+      ) / 2,
+    width: Dimensions.get("window").width * 0.15,
+    height: Dimensions.get("window").width * 0.15,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 2,
+    marginTop: 10
   },
   modalText: {
     marginBottom: 15,
@@ -139,7 +147,8 @@ const styles = StyleSheet.create({
     width: '100%',
     flex: 1,
     borderWidth: 2,
-    marginBottom: 5
+    marginBottom: 5,
+    borderRadius: 10
   },
   textInput2: {
     flex: 4,

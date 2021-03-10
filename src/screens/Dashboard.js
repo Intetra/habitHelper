@@ -14,12 +14,21 @@ export default function Dashboard({ navigation }) {
   const [habits, setHabits] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    var day = new Date().getDate(); //Current Day
+    var month = new Date().getMonth() + 1; //Current Month
+    var year = new Date().getFullYear(); //Current Year
+    setCurrentDate(month + "/" + day + "/" + year);
+  }, []);
+
   const habitGetter = () => {
     const fetch = async () => {
       setHabits(await getHabits());
     };
     fetch();
-  }
+  };
 
   const updateModalVisible = () => {
     if (modalVisible) {
@@ -31,7 +40,7 @@ export default function Dashboard({ navigation }) {
 
   //fetch habits and store in state
   useEffect(() => {
-    habitGetter()
+    habitGetter();
   }, []);
 
   //flatlist renderItem handler
@@ -42,7 +51,7 @@ export default function Dashboard({ navigation }) {
         id={prop.item.uid}
         details={prop.item.details}
         habitGetter={() => {
-          habitGetter()
+          habitGetter();
         }}
       />
     );
@@ -50,7 +59,7 @@ export default function Dashboard({ navigation }) {
 
   //create new habit button handler
   const handleCreate = () => {
-    setModalVisible(true)
+    setModalVisible(true);
   };
 
   const HabitList = () => {
@@ -81,11 +90,12 @@ export default function Dashboard({ navigation }) {
       <CreateModal
         modalVisible={modalVisible}
         habitGetter={() => {
-          habitGetter()
+          habitGetter();
         }}
         updateModalVisible={() => {
-          updateModalVisible()
+          updateModalVisible();
         }}
+        currentDate={currentDate}
       />
     </View>
   );
@@ -104,15 +114,20 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   buttonHolder: {
-    position: 'absolute',
+    position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    bottom: '10%',
-    right: '2%'
+    bottom: "10%",
+    right: "2%",
   },
   button: {
-    padding: 20,
-    borderRadius: 50,
+    padding: 10,
+    borderRadius:
+      Math.round(
+        Dimensions.get("window").width + Dimensions.get("window").height
+      ) / 2,
+    width: Dimensions.get("window").width * 0.22,
+    height: Dimensions.get("window").width * 0.22,
     backgroundColor: "#2E6194",
     alignItems: "center",
     justifyContent: "center",

@@ -2,6 +2,7 @@ import * as firebase from "firebase";
 import "firebase/firestore";
 import { Alert } from "react-native";
 
+//user authentication flow
 export async function registration(email, password, lastName, firstName) {
   try {
     await firebase.auth().createUserWithEmailAndPassword(email, password);
@@ -34,15 +35,21 @@ export async function loggingOut() {
   }
 }
 
+//habit workflows
 export const getHabits = async () => {
   let uid = firebase.auth().currentUser.uid;
   try {
     let habits = await firebase
       .firestore()
-      .collection(`/users/${uid}/habits`)
+      .collection("users")
+      .doc(uid)
+      .collection("habits")
       .get();
 
-    return habits.docs.map((doc) => Object.assign({ uid: doc.id }, doc.data()));
+    habits = habits.docs.map((doc) =>
+      Object.assign({ uid: doc.id }, doc.data())
+    );
+    return habits;
   } catch (err) {
     Alert.alert("There is an error.", err.message);
   }
@@ -63,18 +70,16 @@ export const getUserInfo = async () => {
   }
 };
 
-export async function createHabit(title, details) {
+export async function createHabit(title, details, date) {
   if (title) {
     try {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
-      db.collection("users")
-        .doc(uid)
-        .collection("habits")
-        .add({
-          title,
-          details
-        })
+      db.collection("users").doc(uid).collection("habits").add({
+        title,
+        details,
+        date,
+      });
     } catch (err) {
       Alert.alert("There is something wrong!", err.message);
     }
@@ -84,19 +89,15 @@ export async function createHabit(title, details) {
 }
 
 export async function updateHabit(id, title, details) {
-  if (id, title) {
-    console.log(details)
+  if ((id, title)) {
+    console.log(details);
     try {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
-      db.collection("users")
-        .doc(uid)
-        .collection("habits")
-        .doc(id)
-        .set({
-          title,
-          details
-        })
+      db.collection("users").doc(uid).collection("habits").doc(id).set({
+        title,
+        details,
+      });
     } catch (err) {
       Alert.alert("There is something wrong!", err.message);
     }
@@ -110,11 +111,7 @@ export async function deleteHabit(id) {
     try {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
-      db.collection("users")
-        .doc(uid)
-        .collection("habits")
-        .doc(id)
-        .delete()
+      db.collection("users").doc(uid).collection("habits").doc(id).delete();
     } catch (err) {
       Alert.alert("There is something wrong!", err.message);
     }
