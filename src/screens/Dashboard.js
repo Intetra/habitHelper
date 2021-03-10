@@ -4,36 +4,51 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { Entypo } from "@expo/vector-icons";
 import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
-import getHabits from '../customHooks/getHabits'
+import { getHabits } from "../api/firebaseMethods";
+import CreateModal from "./habitCRUD/CreateModal";
 
 export default function Dashboard({ navigation }) {
-  //initialize habit state with empty array
+  //get uid for current user
+  let uid = firebase.auth().currentUser.uid;
+  //initialize state variables
   const [habits, setHabits] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  //fetch habits and store in state
-  useEffect(() => {
+  const habitGetter = () => {
     const fetch = async () => {
       setHabits(await getHabits());
     };
     fetch();
-  }, [])
+  }
 
+  const updateModalVisible = () => {
+    if (modalVisible) {
+      setModalVisible(false);
+    } else {
+      setModalVisible(true);
+    }
+
+  };
+
+  //fetch habits and store in state
+  useEffect(() => {
+    habitGetter()
+  }, []);
 
   //flatlist renderItem handler
   const renderHabit = (prop) => {
     return (
       <Habit
-        title={prop.item.name}
+        title={prop.item.title}
         id={prop.item.uid}
         details={prop.item.details}
       />
     );
   };
 
-  //TO_DO!!!!!
-  //create new task functionality
+  //create new habit button handler
   const handleCreate = () => {
-    Alert.alert("Create pressed.");
+    setModalVisible(true)
   };
 
   const HabitList = () => {
@@ -48,8 +63,8 @@ export default function Dashboard({ navigation }) {
           }}
         />
       </View>
-    )
-  }
+    );
+  };
 
   const { container, buttonHolder, button } = styles;
 
@@ -61,27 +76,37 @@ export default function Dashboard({ navigation }) {
           <Entypo name="add-to-list" size={40} color="white" />
         </TouchableOpacity>
       </View>
+      <CreateModal
+        modalVisible={modalVisible}
+        habitGetter={() => {
+          habitGetter()
+        }}
+        updateModalVisible={() => {
+          updateModalVisible()
+        }}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    height: Dimensions.get('window').height,
-    width: Dimensions.get('window').width,
+    height: Dimensions.get("window").height,
+    width: Dimensions.get("window").width,
     flexDirection: "column",
     alignItems: "center",
-    paddingVertical: '15%'
+    paddingVertical: "15%",
   },
   listStyle: {
-    width: '100%',
-    height: '85%'
+    width: "100%",
+    height: "100%",
   },
   buttonHolder: {
-    height: '15%',
-    width: "100%",
+    position: 'absolute',
     alignItems: "center",
     justifyContent: "center",
+    bottom: '10%',
+    right: '2%'
   },
   button: {
     padding: 20,

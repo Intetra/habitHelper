@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { loggingOut } from "../api/firebaseMethods";
-import getUserInfo from "../customHooks/getUserInfo";
+import { getUserInfo } from "../api/firebaseMethods";
 
 export default function Account({ navigation }) {
   const [info, setInfo] = useState({ email: "", firstName: "", lastName: "" });
