@@ -82,3 +82,21 @@ export async function createHabit(title, details) {
     Alert.alert("Title is required!");
   }
 }
+
+export async function deleteHabit(id) {
+  if (id) {
+    try {
+      let uid = firebase.auth().currentUser.uid;
+      const db = firebase.firestore();
+      db.collection("users")
+        .doc(uid)
+        .collection("habits")
+        .doc(id)
+        .delete()
+    } catch (err) {
+      Alert.alert("There is something wrong!", err.message);
+    }
+  } else {
+    Alert.alert("There is something wrong!");
+  }
+}

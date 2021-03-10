@@ -35,7 +35,7 @@ export default function CreateModal(props) {
         createHabit(title, details);
         emptyState();
         updateModalVisible();
-        habitGetter()
+        habitGetter();
       }
     };
 

@@ -27,7 +27,6 @@ export default function Dashboard({ navigation }) {
     } else {
       setModalVisible(true);
     }
-
   };
 
   //fetch habits and store in state
@@ -42,6 +41,9 @@ export default function Dashboard({ navigation }) {
         title={prop.item.title}
         id={prop.item.uid}
         details={prop.item.details}
+        habitGetter={() => {
+          habitGetter()
+        }}
       />
     );
   };
