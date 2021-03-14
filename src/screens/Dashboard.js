@@ -7,7 +7,7 @@ import Habit from "../components/Habit";
 import { getHabits } from "../api/firebaseMethods";
 import CreateModal from "./habitCRUD/CreateModal";
 
-export default function Dashboard({ navigation }) {
+export default function Dashboard() {
   //get uid for current user
   let uid = firebase.auth().currentUser.uid;
   //initialize state variables
@@ -30,6 +30,7 @@ export default function Dashboard({ navigation }) {
     fetch();
   };
 
+  //modal display switch
   const updateModalVisible = () => {
     if (modalVisible) {
       setModalVisible(false);
@@ -43,13 +44,17 @@ export default function Dashboard({ navigation }) {
     habitGetter();
   }, []);
 
-  //flatlist renderItem handler
+  //uncompleted flatlist renderItem handler
   const renderHabit = (prop) => {
+    const { title, uid, details, creationDate, completed } = prop.item
     return (
       <Habit
-        title={prop.item.title}
-        id={prop.item.uid}
-        details={prop.item.details}
+        title={title}
+        id={uid}
+        details={details}
+        creationDate={creationDate}
+        completed={completed}
+        date={currentDate}
         habitGetter={() => {
           habitGetter();
         }}
@@ -61,11 +66,10 @@ export default function Dashboard({ navigation }) {
   const handleCreate = () => {
     setModalVisible(true);
   };
-
+  //flatlist renderer
   const HabitList = () => {
-    const { listStyle } = styles;
     return (
-      <View style={listStyle}>
+      <View style={styles.listStyle}>
         <FlatList
           data={habits}
           renderItem={(habit) => renderHabit(habit)}

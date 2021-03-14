@@ -1,6 +1,7 @@
+import React, { useState } from 'react'
 import * as firebase from "firebase";
 import "firebase/firestore";
-import { Alert } from "react-native";
+import { Alert, Date } from "react-native";
 
 //user authentication flow
 export async function registration(email, password, lastName, firstName) {
@@ -78,7 +79,8 @@ export async function createHabit(title, details, date) {
       db.collection("users").doc(uid).collection("habits").add({
         title,
         details,
-        date,
+        creationDate: date,
+        completed: false,
       });
     } catch (err) {
       Alert.alert("There is something wrong!", err.message);
@@ -88,17 +90,37 @@ export async function createHabit(title, details, date) {
   }
 }
 
+export async function completeHabit(id, date) {
+  try {
+    let uid = firebase.auth().currentUser.uid;
+
+    const db = firebase.firestore();
+    let habit = await db
+      .collection("users")
+      .doc(uid)
+      .collection("habits")
+      .doc(id)
+      .get();
+    let bool = habit.data().completed
+    db.collection("users").doc(uid).collection("habits").doc(id).update({
+      completed: !bool,
+      completedDate: date
+    });
+  } catch {}
+}
+
 export async function updateHabit(id, title, details) {
   if ((id, title)) {
-    console.log(details);
     try {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
-      db.collection("users").doc(uid).collection("habits").doc(id).set({
+
+      db.collection("users").doc(uid).collection("habits").doc(id).update({
         title,
         details,
       });
     } catch (err) {
+      console.log(err.message);
       Alert.alert("There is something wrong!", err.message);
     }
   } else {

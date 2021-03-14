@@ -10,6 +10,7 @@ import SignIn from "./src/screens/authFlow/SignIn";
 import LoadingScreen from "./src/screens/authFlow/LoadingScreen";
 import DashboardNavigator from "./src/middleware/DashboardNavigator";
 import Account from "./src/screens/Account";
+import * as TaskManager from 'expo-task-manager'
 
 const Stack = createStackNavigator();
 
