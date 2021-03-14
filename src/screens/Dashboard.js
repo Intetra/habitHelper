@@ -5,7 +5,7 @@ import { Entypo } from "@expo/vector-icons";
 import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
 import { getHabits } from "../api/firebaseMethods";
-import CreateModal from "./habitCRUD/CreateModal";
+import CreationModal from "./habitCRUD/CreationModal";
 
 export default function Dashboard() {
   //get uid for current user
@@ -14,21 +14,19 @@ export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const [currentDate, setCurrentDate] = useState("");
+  var day = new Date().getDate(); //Current Day
+  var month = new Date().getMonth() + 1; //Current Month
+  var year = new Date().getFullYear(); //Current Year
+  var date = month + "/" + day + "/" + year
 
-  useEffect(() => {
-    var day = new Date().getDate(); //Current Day
-    var month = new Date().getMonth() + 1; //Current Month
-    var year = new Date().getFullYear(); //Current Year
-    setCurrentDate(month + "/" + day + "/" + year);
-  }, []);
 
-  const habitGetter = () => {
-    const fetch = async () => {
-      setHabits(await getHabits());
+
+
+    const habitGetter = async () => {
+      setHabits(await getHabits(date));
     };
-    fetch();
-  };
+
+
 
   //modal display switch
   const updateModalVisible = () => {
@@ -41,7 +39,7 @@ export default function Dashboard() {
 
   //fetch habits and store in state
   useEffect(() => {
-    habitGetter();
+    habitGetter()
   }, []);
 
   //uncompleted flatlist renderItem handler
@@ -54,7 +52,7 @@ export default function Dashboard() {
         details={details}
         creationDate={creationDate}
         completed={completed}
-        date={currentDate}
+        date={date}
         habitGetter={() => {
           habitGetter();
         }}
@@ -91,7 +89,7 @@ export default function Dashboard() {
           <Entypo name="add-to-list" size={40} color="white" />
         </TouchableOpacity>
       </View>
-      <CreateModal
+      <CreationModal
         modalVisible={modalVisible}
         habitGetter={() => {
           habitGetter();
@@ -99,7 +97,7 @@ export default function Dashboard() {
         updateModalVisible={() => {
           updateModalVisible();
         }}
-        currentDate={currentDate}
+        currentDate={date}
       />
     </View>
   );

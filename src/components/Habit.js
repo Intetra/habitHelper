@@ -12,10 +12,19 @@ import { AntDesign, Feather } from "@expo/vector-icons";
 import EditModal from "../screens/habitCRUD/EditModal";
 
 const Habit = (props) => {
-  const { title, id, details, habitGetter, creationDate, completed, date } = props;
+  const {
+    title,
+    id,
+    details,
+    habitGetter,
+    creationDate,
+    completed,
+    date,
+  } = props;
   const { titleStyle, idStyle, detailsStyle, titleHolder } = styles;
   const [expanded, setExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+
   //modal display switch
   const updateModalVisible = () => {
     if (modalVisible) {
@@ -31,9 +40,8 @@ const Habit = (props) => {
   };
 
   const handleDelete = async (id) => {
-    await deleteHabit(id).then(() => {
-      habitGetter();
-    });
+    await deleteHabit(id);
+    await habitGetter();
   };
 
   const handleUpdate = () => {
@@ -41,9 +49,8 @@ const Habit = (props) => {
   };
 
   const handleComplete = async (id) => {
-    await completeHabit(id, date).then(() => {
-      habitGetter();
-    });
+    await completeHabit(id, date);
+    await habitGetter();
   };
 
   if (expanded) {
@@ -90,7 +97,10 @@ const Habit = (props) => {
     );
   } else {
     return (
-      <TouchableOpacity style={[styles.container, { flexDirection: 'row'}]} onPress={() => handleExpand()}>
+      <TouchableOpacity
+        style={[styles.container, { flexDirection: "row" }]}
+        onPress={() => handleExpand()}
+      >
         <TouchableOpacity
           style={styles.button}
           onPress={() => handleComplete(id)}

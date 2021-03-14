@@ -1,7 +1,6 @@
-import React, { useState } from 'react'
 import * as firebase from "firebase";
 import "firebase/firestore";
-import { Alert, Date } from "react-native";
+import { Alert } from "react-native";
 
 //user authentication flow
 export async function registration(email, password, lastName, firstName) {
@@ -37,7 +36,7 @@ export async function loggingOut() {
 }
 
 //habit workflows
-export const getHabits = async () => {
+export const getHabits = async (today) => {
   let uid = firebase.auth().currentUser.uid;
   try {
     let habits = await firebase
@@ -50,6 +49,27 @@ export const getHabits = async () => {
     habits = habits.docs.map((doc) =>
       Object.assign({ uid: doc.id }, doc.data())
     );
+
+    await habits.forEach(async (habit) => {
+      if (habit.completed) {
+        if (habit.completedDate === today) {
+          //do nothing
+          console.log(habit.title + ': Completed Today')
+        } else {
+          const db = firebase.firestore()
+          await db.collection("users").doc(uid).collection("habits").doc(habit.uid).update({
+            completed: false,
+          });
+        }
+      } else {
+        if (habit.completedDate) {
+          console.log(habit.title + ': last completed on ' + habit.completedDate)
+        } else {
+          console.log(habit.title + ': never completed')
+        }
+      }
+    });
+
     return habits;
   } catch (err) {
     Alert.alert("There is an error.", err.message);
@@ -76,7 +96,7 @@ export async function createHabit(title, details, date) {
     try {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
-      db.collection("users").doc(uid).collection("habits").add({
+      await db.collection("users").doc(uid).collection("habits").add({
         title,
         details,
         creationDate: date,
@@ -101,11 +121,45 @@ export async function completeHabit(id, date) {
       .collection("habits")
       .doc(id)
       .get();
-    let bool = habit.data().completed
-    db.collection("users").doc(uid).collection("habits").doc(id).update({
-      completed: !bool,
-      completedDate: date
-    });
+    let completed = await habit.data().completed;
+    let completedDate = await habit.data().completedDate
+    let previousCompletedDate = await habit.data().previousCompletedDate;
+
+    if (!completed) {
+      //not completed
+      if (!completedDate) {
+        //never completed
+        await db.collection("users").doc(uid).collection("habits").doc(id).update({
+          previousCompletedDate: null,
+          completedDate: date,
+          completed: !completed
+        });
+      } else {
+        //complete again
+        await db.collection("users").doc(uid).collection("habits").doc(id).update({
+          previousCompletedDate: completedDate,
+          completedDate: date,
+          completed: !completed
+        });
+      }
+    } else {
+      if (!previousCompletedDate) {
+        //completed once
+        await db.collection("users").doc(uid).collection("habits").doc(id).update({
+          previousCompletedDate: null,
+          completedDate: null,
+          completed: !completed
+        });
+      } else {
+        //completed multiple times
+        await db.collection("users").doc(uid).collection("habits").doc(id).update({
+          previousCompletedDate: completedDate,
+          completedDate: previousCompletedDate,
+          completed: !completed
+        });
+      }
+    }
+
   } catch {}
 }
 
@@ -115,12 +169,11 @@ export async function updateHabit(id, title, details) {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
 
-      db.collection("users").doc(uid).collection("habits").doc(id).update({
+      await db.collection("users").doc(uid).collection("habits").doc(id).update({
         title,
         details,
       });
     } catch (err) {
-      console.log(err.message);
       Alert.alert("There is something wrong!", err.message);
     }
   } else {
@@ -133,7 +186,7 @@ export async function deleteHabit(id) {
     try {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
-      db.collection("users").doc(uid).collection("habits").doc(id).delete();
+      await db.collection("users").doc(uid).collection("habits").doc(id).delete();
     } catch (err) {
       Alert.alert("There is something wrong!", err.message);
     }
