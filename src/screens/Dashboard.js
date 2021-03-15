@@ -23,7 +23,7 @@ export default function Dashboard() {
 
 
     const habitGetter = async () => {
-      setHabits(await getHabits(date));
+      await setHabits(await getHabits(date));
     };
 
 

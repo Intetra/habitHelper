@@ -3,7 +3,7 @@ import "firebase/firestore";
 import { Alert } from "react-native";
 
 //user authentication flow
-export async function registration(email, password, lastName, firstName) {
+export const registration = async (email, password, lastName, firstName) => {
   try {
     await firebase.auth().createUserWithEmailAndPassword(email, password);
     const currentUser = firebase.auth().currentUser;
@@ -17,28 +17,28 @@ export async function registration(email, password, lastName, firstName) {
   } catch (err) {
     Alert.alert("There is something wrong!", err.message);
   }
-}
+};
 
-export async function signIn(email, password) {
+export const signIn = async (email, password) => {
   try {
     await firebase.auth().signInWithEmailAndPassword(email, password);
   } catch (err) {
     Alert.alert("There is something wrong!", err.message);
   }
-}
+};
 
-export async function loggingOut() {
+export const loggingOut = async () => {
   try {
     await firebase.auth().signOut();
   } catch (err) {
     Alert.alert("There is something wrong!", err.message);
   }
-}
+};
 
 //habit workflows
 export const getHabits = async (today) => {
-  let uid = firebase.auth().currentUser.uid;
   try {
+    let uid = await firebase.auth().currentUser.uid;
     let habits = await firebase
       .firestore()
       .collection("users")
@@ -54,18 +54,25 @@ export const getHabits = async (today) => {
       if (habit.completed) {
         if (habit.completedDate === today) {
           //do nothing
-          console.log(habit.title + ': Completed Today')
+          console.log(habit.title + ": Completed Today");
         } else {
-          const db = firebase.firestore()
-          await db.collection("users").doc(uid).collection("habits").doc(habit.uid).update({
-            completed: false,
-          });
+          const db = firebase.firestore();
+          await db
+            .collection("users")
+            .doc(uid)
+            .collection("habits")
+            .doc(habit.uid)
+            .update({
+              completed: false,
+            });
         }
       } else {
         if (habit.completedDate) {
-          console.log(habit.title + ': last completed on ' + habit.completedDate)
+          console.log(
+            habit.title + ": last completed on " + habit.completedDate
+          );
         } else {
-          console.log(habit.title + ': never completed')
+          console.log(habit.title + ": never completed");
         }
       }
     });
@@ -77,8 +84,8 @@ export const getHabits = async (today) => {
 };
 
 export const getUserInfo = async () => {
-  let uid = firebase.auth().currentUser.uid;
   try {
+    let uid = await firebase.auth().currentUser.uid;
     let doc = await firebase.firestore().collection("users").doc(uid).get();
 
     if (!doc.exists) {
@@ -91,30 +98,30 @@ export const getUserInfo = async () => {
   }
 };
 
-export async function createHabit(title, details, date) {
-  if (title) {
-    try {
-      let uid = firebase.auth().currentUser.uid;
-      const db = firebase.firestore();
+export const createHabit = async (title, details, date) => {
+  try {
+    if (title) {
+      let uid = await firebase.auth().currentUser.uid;
+      const db = await firebase.firestore();
       await db.collection("users").doc(uid).collection("habits").add({
         title,
         details,
         creationDate: date,
         completed: false,
       });
-    } catch (err) {
-      Alert.alert("There is something wrong!", err.message);
+    } else {
+      Alert.alert("Title is required!");
     }
-  } else {
-    Alert.alert("Title is required!");
+  } catch (err) {
+    Alert.alert("There is something wrong!", err.message);
   }
 }
 
-export async function completeHabit(id, date) {
+export const completeHabit = async (id, date) => {
   try {
-    let uid = firebase.auth().currentUser.uid;
+    let uid = await firebase.auth().currentUser.uid;
 
-    const db = firebase.firestore();
+    let db = await firebase.firestore();
     let habit = await db
       .collection("users")
       .doc(uid)
@@ -122,71 +129,104 @@ export async function completeHabit(id, date) {
       .doc(id)
       .get();
     let completed = await habit.data().completed;
-    let completedDate = await habit.data().completedDate
+    let completedDate = await habit.data().completedDate;
     let previousCompletedDate = await habit.data().previousCompletedDate;
 
     if (!completed) {
       //not completed
       if (!completedDate) {
         //never completed
-        await db.collection("users").doc(uid).collection("habits").doc(id).update({
-          previousCompletedDate: null,
-          completedDate: date,
-          completed: !completed
-        });
+        await db
+          .collection("users")
+          .doc(uid)
+          .collection("habits")
+          .doc(id)
+          .update({
+            completedDate: date,
+            completed: true,
+          });
       } else {
-        //complete again
-        await db.collection("users").doc(uid).collection("habits").doc(id).update({
-          previousCompletedDate: completedDate,
-          completedDate: date,
-          completed: !completed
-        });
+        //not completed
+        //completed at least once before
+        await db
+          .collection("users")
+          .doc(uid)
+          .collection("habits")
+          .doc(id)
+          .update({
+            previousCompletedDate: completedDate,
+            completedDate: date,
+            completed: true,
+          });
       }
     } else {
+      //is completed
       if (!previousCompletedDate) {
         //completed once
-        await db.collection("users").doc(uid).collection("habits").doc(id).update({
-          previousCompletedDate: null,
-          completedDate: null,
-          completed: !completed
-        });
+        //get the FieldValue object
+        const FieldValue = await firebase.firestore.FieldValue;        
+        await db
+          .collection("users")
+          .doc(uid)
+          .collection("habits")
+          .doc(id)
+          .update({
+            previousCompletedDate: FieldValue.delete(),
+            completedDate: FieldValue.delete(),
+            completed: false,
+          });
       } else {
         //completed multiple times
-        await db.collection("users").doc(uid).collection("habits").doc(id).update({
-          previousCompletedDate: completedDate,
-          completedDate: previousCompletedDate,
-          completed: !completed
-        });
+        await db
+          .collection("users")
+          .doc(uid)
+          .collection("habits")
+          .doc(id)
+          .update({
+            completedDate: previousCompletedDate,
+            completed: false,
+          });
       }
     }
-
-  } catch {}
-}
-
-export async function updateHabit(id, title, details) {
-  if ((id, title)) {
-    try {
-      let uid = firebase.auth().currentUser.uid;
-      const db = firebase.firestore();
-
-      await db.collection("users").doc(uid).collection("habits").doc(id).update({
-        title,
-        details,
-      });
-    } catch (err) {
-      Alert.alert("There is something wrong!", err.message);
-    }
-  } else {
-    Alert.alert("There is something wrong!");
+  } catch (err) {
+    console.log(err)
   }
 }
 
-export async function deleteHabit(id) {
+export const updateHabit = async (id, title, details) => {
+   try {
+    if ((id, title)) {
+      let uid = firebase.auth().currentUser.uid;
+      const db = firebase.firestore();
+
+      await db
+        .collection("users")
+        .doc(uid)
+        .collection("habits")
+        .doc(id)
+        .update({
+          title,
+          details,
+        });
+    } else {
+      Alert.alert("There is something wrong!");
+    }
+  } catch (err) {
+    Alert.alert("There is something wrong!", err.message);
+  }
+}
+
+export const deleteHabit = async (id) => {
   if (id) {
     try {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
-      await db.collection("users").doc(uid).collection("habits").doc(id).delete();
+      await db
+        .collection("users")
+        .doc(uid)
+        .collection("habits")
+        .doc(id)
+        .delete();
     } catch (err) {
       Alert.alert("There is something wrong!", err.message);
     }
