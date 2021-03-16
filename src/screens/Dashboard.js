@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Dimensions, StyleSheet, Alert, FlatList } from "react-native";
+import {
+  View,
+  Dimensions,
+  StyleSheet,
+  Alert,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Entypo } from "@expo/vector-icons";
 import * as firebase from "firebase/app";
@@ -8,25 +15,20 @@ import { getHabits } from "../api/firebaseMethods";
 import CreationModal from "./habitCRUD/CreationModal";
 
 export default function Dashboard() {
-  //get uid for current user
-  let uid = firebase.auth().currentUser.uid;
   //initialize state variables
   const [habits, setHabits] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
 
-  var day = new Date().getDate(); //Current Day
-  var month = new Date().getMonth() + 1; //Current Month
-  var year = new Date().getFullYear(); //Current Year
-  var date = month + "/" + day + "/" + year
+  const day = new Date().getDate(); //Current Day
+  const month = new Date().getMonth() + 1; //Current Month
+  const year = new Date().getFullYear(); //Current Year
+  const date = month + "/" + day + "/" + year;
 
-
-
-
-    const habitGetter = async () => {
-      await setHabits(await getHabits(date));
-    };
-
-
+  //fetch habits and store in state
+  useEffect(() => {
+    getHabits(date, setHabits, loading, setLoading);
+  }, [loading]);
 
   //modal display switch
   const updateModalVisible = () => {
@@ -37,25 +39,17 @@ export default function Dashboard() {
     }
   };
 
-  //fetch habits and store in state
-  useEffect(() => {
-    habitGetter()
-  }, []);
-
   //uncompleted flatlist renderItem handler
-  const renderHabit = (prop) => {
-    const { title, uid, details, creationDate, completed } = prop.item
+  const renderHabit = (habit) => {
+    const { title, id, details, creationDate, completed } = habit.item;
     return (
       <Habit
         title={title}
-        id={uid}
+        id={id}
         details={details}
         creationDate={creationDate}
         completed={completed}
         date={date}
-        habitGetter={() => {
-          habitGetter();
-        }}
       />
     );
   };
@@ -81,26 +75,31 @@ export default function Dashboard() {
 
   const { container, buttonHolder, button } = styles;
 
-  return (
-    <View style={container}>
-      <HabitList />
-      <View style={buttonHolder}>
-        <TouchableOpacity style={button} onPress={handleCreate}>
-          <Entypo name="add-to-list" size={40} color="white" />
-        </TouchableOpacity>
+  if (loading) {
+    return (
+      <View style={container}>
+        <ActivityIndicator size="large" />
       </View>
-      <CreationModal
-        modalVisible={modalVisible}
-        habitGetter={() => {
-          habitGetter();
-        }}
-        updateModalVisible={() => {
-          updateModalVisible();
-        }}
-        currentDate={date}
-      />
-    </View>
-  );
+    );
+  } else {
+    return (
+      <View style={container}>
+        <HabitList />
+        <View style={buttonHolder}>
+          <TouchableOpacity style={button} onPress={handleCreate}>
+            <Entypo name="add-to-list" size={40} color="white" />
+          </TouchableOpacity>
+        </View>
+        <CreationModal
+          modalVisible={modalVisible}
+          updateModalVisible={() => {
+            updateModalVisible();
+          }}
+          currentDate={date}
+        />
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({

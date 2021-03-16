@@ -16,7 +16,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { createHabit } from '../../api/firebaseMethods'
 
 export default function CreationModal(props) {
-  const { modalVisible, updateModalVisible, habitGetter, currentDate } = props;
+  const { modalVisible, updateModalVisible, currentDate } = props;
   const { centeredView, modalView, closeButton, openButton } = styles;
 
   const CreateHabitForm = () => {
@@ -35,7 +35,6 @@ export default function CreationModal(props) {
         createHabit(title, details, currentDate);
         emptyState();
         updateModalVisible();
-        habitGetter();
       }
     };
 

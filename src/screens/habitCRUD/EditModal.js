@@ -13,7 +13,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { updateHabit } from '../../api/firebaseMethods'
 
 export default function EditModal(props) {
-  const { id, title, details, modalVisible, updateModalVisible, habitGetter } = props;
+  const { id, title, details, modalVisible, updateModalVisible } = props;
   const { centeredView, modalView, openButton } = styles;
 
   const EditHabitForm = () => {
@@ -29,7 +29,6 @@ export default function EditModal(props) {
         updateHabit( id, newTitle, newDetails );
         emptyState();
         updateModalVisible();
-        habitGetter()
     };
 
     return (

@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import * as firebase from "firebase";
 import "firebase/firestore";
 import { Alert } from "react-native";
@@ -36,48 +37,61 @@ export const loggingOut = async () => {
 };
 
 //habit workflows
-export const getHabits = async (today) => {
+export const getHabits = async (today, setHabits, loading, setLoading) => {
   try {
     let uid = await firebase.auth().currentUser.uid;
-    let habits = await firebase
+    let ref = await firebase
       .firestore()
       .collection("users")
       .doc(uid)
       .collection("habits")
-      .get();
+    return ref.onSnapshot((querySnapshot) => {
+      let habits = querySnapshot.docs.map((doc) =>
+        Object.assign({ id: doc.id }, doc.data())
+      );
 
-    habits = habits.docs.map((doc) =>
-      Object.assign({ uid: doc.id }, doc.data())
-    );
+      habits.forEach( async (habit) => {
+        try {
+          if (habit.completed) {
+            //completed
+            if (habit.completedDate === today) {
+              //completed today, do nothing
+              console.log(habit.title + ": Completed Today");
+            } else {
+              //completed before today, switch "completed" to false
+              await firebase
+                .firestore()
+                .collection("users")
+                .doc(uid)
+                .collection("habits")
+                .doc(habit.id)
+                .update({
+                  completed: false,
+                });
+            }
+          } else {
+            //not completed
+            if (habit.completedDate) {
+              //has been completed before
+              console.log(
+                habit.title + ": last completed on " + habit.completedDate
+              );
+            } else {
+              //has never been completed
+              console.log(habit.title + ": never completed");
+            }
+          }
+        } catch (err) {
+          Alert.alert("There is an error.", err.message);
+        }
+      });
 
-    await habits.forEach(async (habit) => {
-      if (habit.completed) {
-        if (habit.completedDate === today) {
-          //do nothing
-          console.log(habit.title + ": Completed Today");
-        } else {
-          const db = firebase.firestore();
-          await db
-            .collection("users")
-            .doc(uid)
-            .collection("habits")
-            .doc(habit.uid)
-            .update({
-              completed: false,
-            });
-        }
-      } else {
-        if (habit.completedDate) {
-          console.log(
-            habit.title + ": last completed on " + habit.completedDate
-          );
-        } else {
-          console.log(habit.title + ": never completed");
-        }
+      setHabits(habits)
+
+      if (loading) {
+        setLoading(false);
       }
     });
-
-    return habits;
   } catch (err) {
     Alert.alert("There is an error.", err.message);
   }
@@ -106,6 +120,7 @@ export const createHabit = async (title, details, date) => {
       await db.collection("users").doc(uid).collection("habits").add({
         title,
         details,
+        timesCompleted: 0,
         creationDate: date,
         completed: false,
       });
@@ -115,7 +130,7 @@ export const createHabit = async (title, details, date) => {
   } catch (err) {
     Alert.alert("There is something wrong!", err.message);
   }
-}
+};
 
 export const completeHabit = async (id, date) => {
   try {
@@ -131,6 +146,7 @@ export const completeHabit = async (id, date) => {
     let completed = await habit.data().completed;
     let completedDate = await habit.data().completedDate;
     let previousCompletedDate = await habit.data().previousCompletedDate;
+    let timesCompleted = await habit.data().timesCompleted;
 
     if (!completed) {
       //not completed
@@ -142,6 +158,7 @@ export const completeHabit = async (id, date) => {
           .collection("habits")
           .doc(id)
           .update({
+            timesCompleted: timesCompleted + 1,
             completedDate: date,
             completed: true,
           });
@@ -154,6 +171,7 @@ export const completeHabit = async (id, date) => {
           .collection("habits")
           .doc(id)
           .update({
+            timesCompleted: timesCompleted + 1,
             previousCompletedDate: completedDate,
             completedDate: date,
             completed: true,
@@ -164,13 +182,14 @@ export const completeHabit = async (id, date) => {
       if (!previousCompletedDate) {
         //completed once
         //get the FieldValue object
-        const FieldValue = await firebase.firestore.FieldValue;        
+        const FieldValue = await firebase.firestore.FieldValue;
         await db
           .collection("users")
           .doc(uid)
           .collection("habits")
           .doc(id)
           .update({
+            timesCompleted: timesCompleted - 1,
             previousCompletedDate: FieldValue.delete(),
             completedDate: FieldValue.delete(),
             completed: false,
@@ -183,18 +202,19 @@ export const completeHabit = async (id, date) => {
           .collection("habits")
           .doc(id)
           .update({
+            timesCompleted: timesCompleted - 1,
             completedDate: previousCompletedDate,
             completed: false,
           });
       }
     }
   } catch (err) {
-    console.log(err)
+    Alert.alert("There is something wrong!", err.message);
   }
-}
+};
 
 export const updateHabit = async (id, title, details) => {
-   try {
+  try {
     if ((id, title)) {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
@@ -214,7 +234,7 @@ export const updateHabit = async (id, title, details) => {
   } catch (err) {
     Alert.alert("There is something wrong!", err.message);
   }
-}
+};
 
 export const deleteHabit = async (id) => {
   if (id) {
@@ -233,4 +253,4 @@ export const deleteHabit = async (id) => {
   } else {
     Alert.alert("There is something wrong!");
   }
-}
+};
