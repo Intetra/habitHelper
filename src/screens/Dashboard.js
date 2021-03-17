@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
+  Text,
   Dimensions,
   StyleSheet,
-  Alert,
   FlatList,
   ActivityIndicator,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { Entypo } from "@expo/vector-icons";
+import { FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
 import { getHabits } from "../api/firebaseMethods";
@@ -17,8 +18,11 @@ import CreationModal from "./habitCRUD/CreationModal";
 export default function Dashboard() {
   //initialize state variables
   const [habits, setHabits] = useState([]);
+  const [completedHabits, setCompletedHabits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
 
   const day = new Date().getDate(); //Current Day
   const month = new Date().getMonth() + 1; //Current Month
@@ -27,7 +31,7 @@ export default function Dashboard() {
 
   //fetch habits and store in state
   useEffect(() => {
-    getHabits(date, setHabits, loading, setLoading);
+    getHabits(date, setHabits, loading, setLoading, setCompletedHabits);
   }, [loading]);
 
   //modal display switch
@@ -41,7 +45,14 @@ export default function Dashboard() {
 
   //uncompleted flatlist renderItem handler
   const renderHabit = (habit) => {
-    const { title, id, details, creationDate, completed } = habit.item;
+    const {
+      title,
+      id,
+      details,
+      creationDate,
+      completed,
+      timesCompleted,
+    } = habit.item;
     return (
       <Habit
         title={title}
@@ -49,6 +60,7 @@ export default function Dashboard() {
         details={details}
         creationDate={creationDate}
         completed={completed}
+        timesCompleted={timesCompleted}
         date={date}
       />
     );
@@ -58,10 +70,15 @@ export default function Dashboard() {
   const handleCreate = () => {
     setModalVisible(true);
   };
+  //expansion handler for completed list
+  const handleExpand = () => {
+    setExpanded(!expanded);
+  };
   //flatlist renderer
   const HabitList = () => {
     return (
       <View style={styles.listStyle}>
+        <Text>Habits</Text>
         <FlatList
           data={habits}
           renderItem={(habit) => renderHabit(habit)}
@@ -72,8 +89,50 @@ export default function Dashboard() {
       </View>
     );
   };
+  //header component for the completed habits list
+  const CompletedHeader = () => {
+    return (
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerText}>Completed</Text>
+        <MaterialCommunityIcons name={`arrow-${expanded?'up':'down'}-drop-circle-outline`} size={26} color="#8c8c8c" />
+      </View>
 
-  const { container, buttonHolder, button } = styles;
+    )
+  }
+  const CompletedHabitList = () => {
+    if (expanded) {
+      return (
+        <View style={[styles.listStyle, styles.listStyle2]}>
+          <TouchableOpacity
+            style={[styles.completed, styles.completedExpanded]}
+            onPress={() => handleExpand()}
+          >
+          <CompletedHeader />
+          </TouchableOpacity>
+          <FlatList
+            data={completedHabits}
+            renderItem={(habit) => renderHabit(habit)}
+            keyExtractor={(item, index) => {
+              return index.toString();
+            }}
+          />
+        </View>
+      );
+    } else {
+      return (
+        <View style={[styles.listStyle, styles.listStyle2]}>
+          <TouchableOpacity
+            style={styles.completed}
+            onPress={() => handleExpand()}
+          >
+            <CompletedHeader expanded={expanded} />
+          </TouchableOpacity>
+        </View>
+      );
+    }
+  };
+
+  const { container, buttonHolder, button, listsHolder } = styles;
 
   if (loading) {
     return (
@@ -84,10 +143,13 @@ export default function Dashboard() {
   } else {
     return (
       <View style={container}>
-        <HabitList />
+        <View style={listsHolder}>
+          <HabitList />
+          <CompletedHabitList />
+        </View>
         <View style={buttonHolder}>
           <TouchableOpacity style={button} onPress={handleCreate}>
-            <Entypo name="add-to-list" size={40} color="white" />
+            <FontAwesome5 name="plus" size={40} color="red" />
           </TouchableOpacity>
         </View>
         <CreationModal
@@ -108,11 +170,35 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width,
     flexDirection: "column",
     alignItems: "center",
+    justifyContent: "center",
     paddingVertical: "15%",
   },
-  listStyle: {
-    width: "100%",
+  listsHolder: {
     height: "100%",
+    width: "100%",
+  },
+  listStyle: {
+    flex: 1,
+    margin: 5,
+  },
+  listStyle2: {},
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent:'center'
+  },
+  headerText: {
+    fontWeight: 'bold',
+    fontSize: 24,
+    marginRight: 20,
+    color: '#8c8c8c'
+  },
+  completed: {
+    alignItems:'center',
+    justifyContent: 'center',
+    height: 50
+  },
+  completedExpanded: {
   },
   buttonHolder: {
     position: "absolute",
@@ -127,9 +213,9 @@ const styles = StyleSheet.create({
       Math.round(
         Dimensions.get("window").width + Dimensions.get("window").height
       ) / 2,
-    width: Dimensions.get("window").width * 0.22,
-    height: Dimensions.get("window").width * 0.22,
-    backgroundColor: "#2E6194",
+    width: Dimensions.get("window").width * 0.20,
+    height: Dimensions.get("window").width * 0.20,
+    backgroundColor: "black",
     alignItems: "center",
     justifyContent: "center",
   },

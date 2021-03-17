@@ -18,6 +18,7 @@ const Habit = (props) => {
     details,
     creationDate,
     completed,
+    timesCompleted,
     date,
   } = props;
 
@@ -39,17 +40,22 @@ const Habit = (props) => {
     setExpanded(!expanded);
   };
 
-  const handleDelete = async (id) => {
-    await deleteHabit(id);
+  const handleDelete = (id) => {
+    deleteHabit(id);
   };
 
   const handleUpdate = () => {
     setModalVisible(true);
   };
 
-  const handleComplete = async (id) => {
-    await completeHabit(id, date);
+  const handleComplete = (id) => {
+    completeHabit(id, date);
   };
+
+  let pluralizer = 's'
+  if (timesCompleted === 1) {
+    pluralizer = ''
+  }
 
   if (expanded) {
     return (
@@ -78,7 +84,11 @@ const Habit = (props) => {
         <Text style={idStyle}>ID: {id}</Text>
         <Text style={idStyle}>Creation Date: {creationDate}</Text>
         <Text style={detailsStyle}>{details}</Text>
-        <Text style={idStyle}>{completed.toString()}</Text>
+        <Text style={idStyle}>{completed ? 'Complete' : 'Incomplete'}</Text>
+        <Text style={detailsStyle}>{
+          `Completed ${timesCompleted} time${pluralizer}`
+        }</Text>
+
         <EditModal
           id={id}
           title={title}
@@ -93,7 +103,7 @@ const Habit = (props) => {
   } else {
     return (
       <TouchableOpacity
-        style={[styles.container, { flexDirection: "row" }]}
+        style={[styles.smallContainer, { flexDirection: "row" }]}
         onPress={() => handleExpand()}
       >
         <TouchableOpacity
@@ -118,14 +128,18 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 5,
   },
+  smallContainer: {
+    alignItems: 'center',
+    justifyContent: 'flex-start'
+  },
   titleHolder: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
   },
   titleStyle: {
-    fontSize: 40,
-    color: "tomato",
+    fontSize: 34,
+    color: "black",
     margin: 10,
   },
   button: {
