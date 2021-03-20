@@ -119,6 +119,9 @@ const Habit = (props) => {
         <TouchableOpacity onPress={() => handleExpand()}>
           <Entypo name="add-to-list" size={24} color="black" />
         </TouchableOpacity>
+        <TouchableOpacity onLongPress={drag}>
+          <Entypo name="dots-three-vertical" size={24} color="black" />
+        </TouchableOpacity>
       </View>
     );
   }

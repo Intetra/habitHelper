@@ -9,12 +9,12 @@ import {
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { FontAwesome5 } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
 import { getHabits } from "../api/firebaseMethods";
 import CreationModal from "./habitCRUD/CreationModal";
 import DraggableFlatList from 'react-native-draggable-flatlist'
+import CompletedHeader from '../components/CompletedHeader'
 
 export default function Dashboard() {
   //initialize state variables
@@ -78,32 +78,30 @@ export default function Dashboard() {
   const handleExpand = () => {
     setExpanded(!expanded);
   };
+
+
+
   //flatlist renderer
   const HabitList = () => {
+    let [ data, setData ] = useState(habits)
+    useEffect(() => {
+      setHabits(data)
+    }, [data])
     return (
       <View style={styles.listStyle}>
         <Text>Habits</Text>
         <DraggableFlatList
-          data={habits}
+          data={data}
           renderItem={renderHabit}
           keyExtractor={(item, index) => {
             return index.toString();
           }}
-          onDragEnd={({ habits }) => setData( habits )}
+          onDragEnd={({ data }) => setData(data)}
         />
       </View>
     );
   };
-  //header component for the completed habits list
-  const CompletedHeader = () => {
-    return (
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>Completed</Text>
-        <MaterialCommunityIcons name={`arrow-${expanded?'up':'down'}-drop-circle-outline`} size={26} color="#8c8c8c" />
-      </View>
 
-    )
-  }
   const CompletedHabitList = () => {
     if (expanded) {
       return (
@@ -112,7 +110,7 @@ export default function Dashboard() {
             style={[styles.completed, styles.completedExpanded]}
             onPress={() => handleExpand()}
           >
-          <CompletedHeader />
+          <CompletedHeader expanded={expanded} />
           </TouchableOpacity>
           <FlatList
             data={completedHabits}
@@ -187,17 +185,6 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   listStyle2: {},
-  headerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent:'center'
-  },
-  headerText: {
-    fontWeight: 'bold',
-    fontSize: 24,
-    marginRight: 20,
-    color: '#8c8c8c'
-  },
   completed: {
     alignItems:'center',
     justifyContent: 'center',
