@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
 import { getHabits } from "../api/firebaseMethods";
 import CreationModal from "./habitCRUD/CreationModal";
+import DraggableFlatList from 'react-native-draggable-flatlist'
 
 export default function Dashboard() {
   //initialize state variables
@@ -44,27 +45,30 @@ export default function Dashboard() {
   };
 
   //uncompleted flatlist renderItem handler
-  const renderHabit = (habit) => {
-    const {
-      title,
-      id,
-      details,
-      creationDate,
-      completed,
-      timesCompleted,
-    } = habit.item;
-    return (
-      <Habit
-        title={title}
-        id={id}
-        details={details}
-        creationDate={creationDate}
-        completed={completed}
-        timesCompleted={timesCompleted}
-        date={date}
-      />
-    );
-  };
+  const renderHabit = useCallback(
+    ({ item, index, drag, isActive }) => {
+      const {
+        title,
+        id,
+        details,
+        creationDate,
+        completed,
+        timesCompleted,
+      } = item;
+      return (
+        <Habit
+          title={title}
+          id={id}
+          details={details}
+          creationDate={creationDate}
+          completed={completed}
+          timesCompleted={timesCompleted}
+          date={date}
+          drag={drag}
+        />
+      )
+    }
+  )
 
   //create new habit button handler
   const handleCreate = () => {
@@ -79,12 +83,13 @@ export default function Dashboard() {
     return (
       <View style={styles.listStyle}>
         <Text>Habits</Text>
-        <FlatList
+        <DraggableFlatList
           data={habits}
-          renderItem={(habit) => renderHabit(habit)}
+          renderItem={renderHabit}
           keyExtractor={(item, index) => {
             return index.toString();
           }}
+          onDragEnd={({ habits }) => setData( habits )}
         />
       </View>
     );

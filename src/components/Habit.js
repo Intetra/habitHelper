@@ -8,7 +8,7 @@ import {
   Alert,
 } from "react-native";
 import { deleteHabit, completeHabit } from "../api/firebaseMethods";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign, Feather, Entypo } from "@expo/vector-icons";
 import EditModal from "../screens/habitCRUD/EditModal";
 
 const Habit = (props) => {
@@ -20,6 +20,7 @@ const Habit = (props) => {
     completed,
     timesCompleted,
     date,
+    drag,
   } = props;
 
   const [expanded, setExpanded] = useState(false);
@@ -52,14 +53,14 @@ const Habit = (props) => {
     completeHabit(id, date);
   };
 
-  let pluralizer = 's'
+  let pluralizer = "s";
   if (timesCompleted === 1) {
-    pluralizer = ''
+    pluralizer = "";
   }
 
   if (expanded) {
     return (
-      <TouchableOpacity style={styles.container} onPress={() => handleExpand()}>
+      <View style={styles.container}>
         <View style={titleHolder}>
           <TouchableOpacity
             style={styles.button}
@@ -68,6 +69,9 @@ const Habit = (props) => {
             <AntDesign name="checkcircleo" size={24} color="green" />
           </TouchableOpacity>
           <Text style={titleStyle}>{title}</Text>
+          <TouchableOpacity onPress={() => handleExpand()}>
+            <Entypo name="add-to-list" size={24} color="black" />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleUpdate(id, title, details)}
@@ -84,10 +88,10 @@ const Habit = (props) => {
         <Text style={idStyle}>ID: {id}</Text>
         <Text style={idStyle}>Creation Date: {creationDate}</Text>
         <Text style={detailsStyle}>{details}</Text>
-        <Text style={idStyle}>{completed ? 'Complete' : 'Incomplete'}</Text>
-        <Text style={detailsStyle}>{
-          `Completed ${timesCompleted} time${pluralizer}`
-        }</Text>
+        <Text style={idStyle}>{completed ? "Complete" : "Incomplete"}</Text>
+        <Text
+          style={detailsStyle}
+        >{`Completed ${timesCompleted} time${pluralizer}`}</Text>
 
         <EditModal
           id={id}
@@ -98,13 +102,12 @@ const Habit = (props) => {
             updateModalVisible();
           }}
         />
-      </TouchableOpacity>
+      </View>
     );
   } else {
     return (
-      <TouchableOpacity
+      <View
         style={[styles.smallContainer, { flexDirection: "row" }]}
-        onPress={() => handleExpand()}
       >
         <TouchableOpacity
           style={styles.button}
@@ -113,7 +116,10 @@ const Habit = (props) => {
           <AntDesign name="checkcircleo" size={24} color="green" />
         </TouchableOpacity>
         <Text style={titleStyle}>{title}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleExpand()}>
+          <Entypo name="add-to-list" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
     );
   }
 };
@@ -129,8 +135,8 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   smallContainer: {
-    alignItems: 'center',
-    justifyContent: 'flex-start'
+    alignItems: "center",
+    justifyContent: "flex-start",
   },
   titleHolder: {
     flex: 1,
