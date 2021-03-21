@@ -5,9 +5,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 //header component for the completed habits list
 const CompletedHeader = (props) => {
   const { expanded } = props
+  const { headerContainer, hcBig, hcSmall, headerText } = styles
   return (
-    <View style={styles.headerContainer}>
-      <Text style={styles.headerText}>Completed</Text>
+    <View style={expanded?[headerContainer, hcBig]:[headerContainer, hcSmall]}>
+      <Text style={headerText}>Completed</Text>
       <MaterialCommunityIcons name={`arrow-${expanded?'up':'down'}-drop-circle-outline`} size={26} color="#8c8c8c" />
     </View>
 
@@ -18,7 +19,16 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent:'center'
+    justifyContent: 'center',
+    height: 60
+  },
+  hcBig: {
+    position: 'absolute',
+    top: 0,
+  },
+  hcSmall: {
+    position:'absolute',
+    bottom: 10,
   },
   headerText: {
     fontWeight: 'bold',

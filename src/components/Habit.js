@@ -25,7 +25,7 @@ const Habit = (props) => {
 
   const [expanded, setExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const { titleStyle, idStyle, detailsStyle, titleHolder } = styles;
+  const { titleStyle, idStyle, detailsStyle, buttonsHolder } = styles;
 
   //modal display switch
   const updateModalVisible = () => {
@@ -61,15 +61,18 @@ const Habit = (props) => {
   if (expanded) {
     return (
       <View style={styles.container}>
-        <View style={titleHolder}>
+      <Text style={titleStyle}>{title}</Text>
+        <View style={buttonsHolder}>
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleComplete(id)}
           >
             <AntDesign name="checkcircleo" size={24} color="green" />
           </TouchableOpacity>
-          <Text style={titleStyle}>{title}</Text>
-          <TouchableOpacity onPress={() => handleExpand()}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => handleExpand()}
+          >
             <Entypo name="add-to-list" size={24} color="black" />
           </TouchableOpacity>
           <TouchableOpacity
@@ -116,10 +119,16 @@ const Habit = (props) => {
           <AntDesign name="checkcircleo" size={24} color="green" />
         </TouchableOpacity>
         <Text style={titleStyle}>{title}</Text>
-        <TouchableOpacity onPress={() => handleExpand()}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => handleExpand()}
+        >
           <Entypo name="add-to-list" size={24} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity onLongPress={drag}>
+        <TouchableOpacity
+          style={styles.button}
+          onPressIn={drag}
+        >
           <Entypo name="dots-three-vertical" size={24} color="black" />
         </TouchableOpacity>
       </View>
@@ -141,7 +150,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
   },
-  titleHolder: {
+  buttonsHolder: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
@@ -156,8 +165,8 @@ const styles = StyleSheet.create({
       Math.round(
         Dimensions.get("window").width + Dimensions.get("window").height
       ) / 2,
-    width: Dimensions.get("window").width * 0.09,
-    height: Dimensions.get("window").width * 0.09,
+    width: Dimensions.get("window").width * 0.12,
+    height: Dimensions.get("window").width * 0.12,
     backgroundColor: "rgba(0,0,0,0.05)",
     justifyContent: "center",
     alignItems: "center",

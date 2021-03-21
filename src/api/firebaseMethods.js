@@ -1,6 +1,5 @@
 import * as firebase from "firebase";
 import "firebase/firestore";
-import { Alert } from "react-native";
 
 //user authentication flow
 export const registration = async (email, password, lastName, firstName) => {
@@ -15,7 +14,7 @@ export const registration = async (email, password, lastName, firstName) => {
       firstName: firstName,
     });
   } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+    console.log("There is something wrong!", err.message);
   }
 };
 
@@ -23,7 +22,7 @@ export const signIn = async (email, password) => {
   try {
     await firebase.auth().signInWithEmailAndPassword(email, password);
   } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+    console.log("There is something wrong!", err.message);
   }
 };
 
@@ -31,7 +30,7 @@ export const loggingOut = async () => {
   try {
     await firebase.auth().signOut();
   } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+    console.log("There is something wrong!", err.message);
   }
 };
 
@@ -41,17 +40,17 @@ export const getUserInfo = async () => {
     let doc = await firebase.firestore().collection("users").doc(uid).get();
 
     if (!doc.exists) {
-      Alert.alert("No user data found!");
+      console.log("No user data found!");
     } else {
       return doc.data();
     }
   } catch (err) {
-    Alert.alert("There is an error.", err.message);
+    console.log("There is an error.", err.message);
   }
 };
 
 //habit workflows
-export const getHabits = (
+export const getHabits = async (
   today,
   setHabits,
   loading,
@@ -60,76 +59,100 @@ export const getHabits = (
 ) => {
   try {
     let uid = firebase.auth().currentUser.uid;
-    let ref = firebase
+    await firebase
       .firestore()
       .collection("users")
       .doc(uid)
-      .collection("habits");
-    return ref.onSnapshot((querySnapshot) => {
-      let habits = querySnapshot.docs.map((doc) =>
-        Object.assign({ id: doc.id }, doc.data())
-      );
+      .collection("habits")
+      .orderBy("order")
+      .onSnapshot((querySnapshot) => {
+        let habits = querySnapshot.docs.map((doc) =>
+          Object.assign({ id: doc.id }, doc.data())
+        )
 
-      habits.forEach(async (habit) => {
-        try {
-          if (habit.completed) {
-            //completed
-            if (habit.completedDate === today) {
-              //completed today, do nothing
-              //console.log(habit.title + ": Completed Today");
-            } else {
-              //completed before today, switch "completed" to false
-              await firebase
-                .firestore()
-                .collection("users")
-                .doc(uid)
-                .collection("habits")
-                .doc(habit.id)
-                .update({
-                  completed: false,
-                });
+        habits.forEach((habit) => {
+          try {
+            if (habit.completed) {
+              if (habit.completedDate != today) {
+                firebase
+                  .firestore()
+                  .collection("users")
+                  .doc(uid)
+                  .collection("habits")
+                  .doc(habit.id)
+                  .update({
+                    completed: false,
+                  });
+              }
             }
-          } else {
-            //not completed
-            if (habit.completedDate) {
-              //has been completed before
-              //console.log(
-              //  habit.title + ": last completed on " + habit.completedDate
-              //);
-            } else {
-              //has never been completed
-              //console.log(habit.title + ": never completed");
-            }
+          } catch (err) {
+            console.log("There is an error.", err.message);
           }
-        } catch (err) {
-          Alert.alert("There is an error.", err.message);
+        });
+
+        let list1 = [];
+        let list2 = [];
+        habits.forEach((habit) => {
+          if (!habit.completed) {
+            list1.push(habit);
+          } else {
+            list2.push(habit);
+          }
+        });
+
+        setHabits(list1);
+        setCompletedHabits(list2);
+
+        if (loading) {
+          setLoading(false);
         }
       });
+  } catch (err) {
+    console.log("There is an error.", err.message);
+  }
+};
 
-      let list1 = [];
-      let list2 = [];
-      habits.forEach((habit) => {
-        if (!habit.completed) {
-          list1.push(habit);
-        } else {
-          list2.push(habit);
-        }
-      });
-
-      setHabits(list1);
-      setCompletedHabits(list2);
-
-      if (loading) {
-        setLoading(false);
-      }
+export const reorderHabits = async (habits) => {
+  try {
+    let uid = firebase.auth().currentUser.uid;
+    habits.forEach(async(habit, index) => {
+      await firebase
+        .firestore()
+        .collection("users")
+        .doc(uid)
+        .collection("habits")
+        .doc(habit.id)
+        .update({
+          order: index,
+        });
     });
   } catch (err) {
-    Alert.alert("There is an error.", err.message);
+    console.log(err.message);
   }
 };
 
 export const createHabit = async (title, details, date) => {
   try {
+    let uid = firebase.auth().currentUser.uid;
+    const ref = await firebase
+      .firestore()
+      .collection("users")
+      .doc(uid)
+      .collection("habits")
+      .get();
+
+    const habits = ref.docs.map((doc) =>
+      Object.assign({ id: doc.id }, doc.data())
+    );
+    let prevMax = 0;
+    if (habits) {
+      if (habits.length === 1) {
+        prevMax = habits.length;
+      } else {
+        prevMax = habits.length + 1;
+      }
+    }
+
     if (title) {
       let uid = firebase.auth().currentUser.uid;
       const db = firebase.firestore();
@@ -139,12 +162,13 @@ export const createHabit = async (title, details, date) => {
         timesCompleted: 0,
         creationDate: date,
         completed: false,
+        order: prevMax,
       });
     } else {
-      Alert.alert("Title is required!");
+      console.log("Title is required!");
     }
   } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+    console.log("There is something wrong!", err.message);
   }
 };
 
@@ -159,6 +183,7 @@ export const completeHabit = async (id, date) => {
       .collection("habits")
       .doc(id)
       .get();
+
     let completed = habit.data().completed;
     let completedDate = habit.data().completedDate;
     let previousCompletedDate = habit.data().previousCompletedDate;
@@ -225,7 +250,7 @@ export const completeHabit = async (id, date) => {
       }
     }
   } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+    console.log("There is something wrong!", err.message);
   }
 };
 
@@ -245,10 +270,10 @@ export const updateHabit = async (id, title, details) => {
           details,
         });
     } else {
-      Alert.alert("There is something wrong!");
+      console.log("There is something wrong!");
     }
   } catch (err) {
-    Alert.alert("There is something wrong!", err.message);
+    console.log("There is something wrong!", err.message);
   }
 };
 
@@ -264,9 +289,9 @@ export const deleteHabit = async (id) => {
         .doc(id)
         .delete();
     } catch (err) {
-      Alert.alert("There is something wrong!", err.message);
+      console.log("There is something wrong!", err.message);
     }
   } else {
-    Alert.alert("There is something wrong!");
+    console.log("There is something wrong!");
   }
 };
