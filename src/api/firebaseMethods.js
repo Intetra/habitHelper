@@ -68,7 +68,7 @@ export const getHabits = async (
       .onSnapshot((querySnapshot) => {
         let habits = querySnapshot.docs.map((doc) =>
           Object.assign({ id: doc.id }, doc.data())
-        )
+        );
 
         habits.forEach((habit) => {
           try {
@@ -115,7 +115,7 @@ export const getHabits = async (
 export const reorderHabits = async (habits) => {
   try {
     let uid = firebase.auth().currentUser.uid;
-    habits.forEach(async(habit, index) => {
+    habits.forEach(async (habit, index) => {
       await firebase
         .firestore()
         .collection("users")
@@ -176,8 +176,8 @@ export const completeHabit = async (id, date) => {
   try {
     let uid = firebase.auth().currentUser.uid;
 
-    let db = firebase.firestore();
-    let habit = await db
+    let habit = await firebase
+      .firestore()
       .collection("users")
       .doc(uid)
       .collection("habits")
@@ -193,7 +193,8 @@ export const completeHabit = async (id, date) => {
       //not completed
       if (!completedDate) {
         //never completed
-        await db
+        await firebase
+          .firestore()
           .collection("users")
           .doc(uid)
           .collection("habits")
@@ -206,7 +207,8 @@ export const completeHabit = async (id, date) => {
       } else {
         //not completed
         //completed at least once before
-        await db
+        await firebase
+          .firestore()
           .collection("users")
           .doc(uid)
           .collection("habits")
@@ -224,7 +226,8 @@ export const completeHabit = async (id, date) => {
         //completed once
         //get the FieldValue object
         const FieldValue = await firebase.firestore.FieldValue;
-        await db
+        await firebase
+          .firestore()
           .collection("users")
           .doc(uid)
           .collection("habits")
@@ -237,7 +240,8 @@ export const completeHabit = async (id, date) => {
           });
       } else {
         //completed multiple times
-        await db
+        await firebase
+          .firestore()
           .collection("users")
           .doc(uid)
           .collection("habits")

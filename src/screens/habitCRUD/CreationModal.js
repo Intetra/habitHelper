@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Dimensions,
   ScrollView,
@@ -14,14 +14,15 @@ import {
 } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import { createHabit } from '../../api/firebaseMethods'
+import { useStateIfMounted } from "use-state-if-mounted";
 
 export default function CreationModal(props) {
   const { modalVisible, updateModalVisible, currentDate } = props;
   const { centeredView, modalView, closeButton, openButton } = styles;
 
   const CreateHabitForm = () => {
-    const [title, setTitle] = useState("");
-    const [details, setDetails] = useState("");
+    const [title, setTitle] = useStateIfMounted("");
+    const [details, setDetails] = useStateIfMounted("");
 
     const emptyState = () => {
       setTitle("");

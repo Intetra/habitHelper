@@ -1,15 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Alert,
 } from "react-native";
 import { deleteHabit, completeHabit } from "../api/firebaseMethods";
 import { AntDesign, Feather, Entypo } from "@expo/vector-icons";
 import EditModal from "../screens/habitCRUD/EditModal";
+import { useStateIfMounted } from "use-state-if-mounted";
 
 const Habit = (props) => {
   const {
@@ -23,8 +23,8 @@ const Habit = (props) => {
     drag,
   } = props;
 
-  const [expanded, setExpanded] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [expanded, setExpanded] = useStateIfMounted(false);
+  const [modalVisible, setModalVisible] = useStateIfMounted(false);
   const { titleStyle, idStyle, detailsStyle, buttonsHolder } = styles;
 
   //modal display switch
@@ -61,7 +61,7 @@ const Habit = (props) => {
   if (expanded) {
     return (
       <View style={styles.container}>
-      <Text style={titleStyle}>{title}</Text>
+        <Text style={titleStyle}>{title}</Text>
         <View style={buttonsHolder}>
           <TouchableOpacity
             style={styles.button}
@@ -109,9 +109,7 @@ const Habit = (props) => {
     );
   } else {
     return (
-      <View
-        style={[styles.smallContainer, { flexDirection: "row" }]}
-      >
+      <View style={[styles.smallContainer, { flexDirection: "row" }]}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => handleComplete(id)}
@@ -119,16 +117,10 @@ const Habit = (props) => {
           <AntDesign name="checkcircleo" size={24} color="green" />
         </TouchableOpacity>
         <Text style={titleStyle}>{title}</Text>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handleExpand()}
-        >
+        <TouchableOpacity style={styles.button} onPress={() => handleExpand()}>
           <Entypo name="add-to-list" size={24} color="black" />
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPressIn={drag}
-        >
+        <TouchableOpacity style={styles.button} onPressIn={drag}>
           <Entypo name="dots-three-vertical" size={24} color="black" />
         </TouchableOpacity>
       </View>

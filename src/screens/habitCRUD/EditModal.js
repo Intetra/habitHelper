@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Modal,
   StyleSheet,
@@ -11,14 +11,15 @@ import {
 } from "react-native";
 import { AntDesign } from '@expo/vector-icons';
 import { updateHabit } from '../../api/firebaseMethods'
+import { useStateIfMounted } from "use-state-if-mounted";
 
 export default function EditModal(props) {
   const { id, title, details, modalVisible, updateModalVisible } = props;
   const { centeredView, modalView, openButton } = styles;
 
   const EditHabitForm = () => {
-    const [newTitle, setNewTitle] = useState(title);
-    const [newDetails, setNewDetails] = useState(details);
+    const [newTitle, setNewTitle] = useStateIfMounted(title);
+    const [newDetails, setNewDetails] = useStateIfMounted(details);
 
     const emptyState = () => {
       setNewTitle("");

@@ -1,29 +1,21 @@
-import React, { useEffect, useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  Dimensions,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-} from "react-native";
+import React, { useEffect, useCallback } from "react";
+import { View, Dimensions, StyleSheet, ActivityIndicator } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { FontAwesome5 } from "@expo/vector-icons";
-import * as firebase from "firebase/app";
 import Habit from "../components/Habit";
-import { getHabits, reorderHabits } from "../api/firebaseMethods";
+import { getHabits } from "../api/firebaseMethods";
 import CreationModal from "./habitCRUD/CreationModal";
 import DraggableFlatList from "react-native-draggable-flatlist";
 import CompletedHeader from "../components/CompletedHeader";
-import { useStateIfMounted } from 'use-state-if-mounted'
+import { useStateIfMounted } from "use-state-if-mounted";
 
 export default function Dashboard() {
   //initialize state variables
   const [habits, setHabits] = useStateIfMounted([]);
   const [completedHabits, setCompletedHabits] = useStateIfMounted([]);
-  const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [expanded, setExpanded] = useState(false);
+  const [loading, setLoading] = useStateIfMounted(true);
+  const [modalVisible, setModalVisible] = useStateIfMounted(false);
+  const [expanded, setExpanded] = useStateIfMounted(false);
 
   const day = new Date().getDate(); //Current Day
   const month = new Date().getMonth() + 1; //Current Month
@@ -32,7 +24,8 @@ export default function Dashboard() {
 
   //fetch habits and store in state
   useEffect(() => {
-    getHabits(date, setHabits, loading, setLoading, setCompletedHabits);
+    let unsubscribe = () => getHabits(date, setHabits, loading, setLoading, setCompletedHabits)
+    unsubscribe()
   }, []);
 
   //modal display switch
@@ -44,8 +37,8 @@ export default function Dashboard() {
     }
   };
 
-  //uncompleted flatlist renderItem handler
-  const renderHabit = useCallback(({ item, index, drag, isActive }) => {
+  //draggable flatlist renderer
+  const renderHabit = ({ item, index, drag, isActive }) => {
     const {
       title,
       id,
@@ -54,6 +47,7 @@ export default function Dashboard() {
       completed,
       timesCompleted,
     } = item;
+
     return (
       <Habit
         title={title}
@@ -64,24 +58,24 @@ export default function Dashboard() {
         timesCompleted={timesCompleted}
         date={date}
         drag={drag}
+        isActive={isActive}
+        key={id}
       />
     );
-  });
+  };
 
-  //create new habit button handler
+  //handler for the create button, shows the creation modal
   const handleCreate = () => {
     setModalVisible(true);
   };
-  //expansion handler for completed list
+  //handler for expanding habits
   const handleExpand = () => {
     setExpanded(!expanded);
-  };
-  const handleReorder = (data) => {
-
   };
 
   //flatlist component
   const HabitList = () => {
+    const [mounted, setMounted] = useStateIfMounted(false)
     if (habits) {
       return (
         <View style={styles.list}>
@@ -91,21 +85,25 @@ export default function Dashboard() {
             keyExtractor={(item, index) => {
               return index.toString();
             }}
-            onDragEnd={({ data }) => {setHabits(data)}}
+            onDragEnd={({ data }) => {
+              setHabits(data);
+            }}
           />
         </View>
       );
     } else {
       return (
-        <View><ActivityIndicator size="large" /></View>
-      )
+        <View>
+          <ActivityIndicator size="large" />
+        </View>
+      );
     }
   };
 
   const CompletedHabitList = () => {
     if (expanded) {
       return (
-        <View style={styles.list}>
+        <View style={[styles.list, styles.list2]}>
           <TouchableOpacity
             style={[styles.completed]}
             onPress={() => handleExpand()}
@@ -118,7 +116,9 @@ export default function Dashboard() {
             keyExtractor={(item, index) => {
               return index.toString();
             }}
-            onDragEnd={({ data }) => {setHabits(data)}}
+            onDragEnd={({ data }) => {
+              setHabits(data);
+            }}
           />
         </View>
       );
@@ -168,8 +168,8 @@ export default function Dashboard() {
   }
 }
 
-let windowWidth = Dimensions.get("window").width
-let windowHeight = Dimensions.get("window").height
+let windowWidth = Dimensions.get("window").width;
+let windowHeight = Dimensions.get("window").height;
 
 const styles = StyleSheet.create({
   container: {
@@ -182,30 +182,35 @@ const styles = StyleSheet.create({
   },
   listsHolder: {
     height: "100%",
-    width: "100%"
+    width: "100%",
   },
   list: {
     flex: 1,
-    padding:5,
-    alignItems: 'center',
-    justifyContent: 'center'
+    padding: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  list2: {
+    paddingBottom: 50,
+    backgroundColor: "#e9e9e9",
   },
   listMin: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 20,
     right: 0,
     left: 0,
     height: 60,
     width: windowWidth,
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center",
   },
   completed: {
     height: 50,
     width: windowWidth,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 10
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
+    backgroundColor: "#e9e9e9",
   },
   buttonHolder: {
     position: "absolute",
@@ -216,10 +221,7 @@ const styles = StyleSheet.create({
   },
   button: {
     padding: 10,
-    borderRadius:
-      Math.round(
-        windowWidth + windowHeight
-      ) / 2,
+    borderRadius: Math.round(windowWidth + windowHeight) / 2,
     width: windowWidth * 0.2,
     height: windowWidth * 0.2,
     backgroundColor: "black",
