@@ -1,12 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { loggingOut } from "../api/firebaseMethods";
 import { getUserInfo } from "../api/firebaseMethods";
-import { useStateIfMounted } from "use-state-if-mounted";
 
 export default function Account({ navigation }) {
-  const [info, setInfo] = useStateIfMounted({ email: "", firstName: "", lastName: "" });
+  const [info, setInfo] = useState({ email: "", firstName: "", lastName: "" });
 
   useEffect(() => {
       const getInfo = async () => {

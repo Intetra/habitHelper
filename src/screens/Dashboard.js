@@ -73,9 +73,12 @@ export default function Dashboard() {
     setExpanded(!expanded);
   };
 
+  const dragEndHandler = (data) => {
+    setHabits(data);
+  }
+
   //flatlist component
   const HabitList = () => {
-    const [mounted, setMounted] = useStateIfMounted(false)
     if (habits) {
       return (
         <View style={styles.list}>
@@ -86,7 +89,7 @@ export default function Dashboard() {
               return index.toString();
             }}
             onDragEnd={({ data }) => {
-              setHabits(data);
+              dragEndHandler(data)
             }}
           />
         </View>
@@ -117,7 +120,7 @@ export default function Dashboard() {
               return index.toString();
             }}
             onDragEnd={({ data }) => {
-              setHabits(data);
+              dragEndHandler(data)
             }}
           />
         </View>

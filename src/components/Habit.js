@@ -12,6 +12,8 @@ import { AntDesign, Feather, Entypo } from "@expo/vector-icons";
 import EditModal from "../screens/habitCRUD/EditModal";
 
 class Habit extends React.Component {
+  _isMounted = false
+
   constructor(props) {
     super(props);
     this.state = {
@@ -19,6 +21,17 @@ class Habit extends React.Component {
       modalVisisble: false
     };
   }
+
+  componentDidMount() {
+    this._isMounted = true
+  }
+  componentWillUnmount() {
+    this._isMounted = false
+    this.setState = (state, callback) => {
+        return;
+    };
+  }
+
   render() {
     const {
       title,
@@ -35,33 +48,45 @@ class Habit extends React.Component {
 
     //modal display switch
     function updateModalVisible() {
-      if (modalVisible) {
-        this.setState({
-          ...this.state,
-          modalVisible: false
-        })
-      } else {
-        this.setState({
-          ...this.state,
-          modalVisible: true
-        })
+      if (this._isMounted) {
+        if (modalVisible) {
+          this.setState({
+            ...this.state,
+            modalVisible: false
+          })
+        } else {
+          this.setState({
+            ...this.state,
+            modalVisible: true
+          })
+        }
       }
+
     };
 
     //habit display switch
     function handleExpand() {
-      this.setState({
-        ...this.state,
-        expanded: !this.state.expanded
-      })
+      if (this._isMounted) {
+        this.setState({
+          ...this.state,
+          expanded: !this.state.expanded
+        })
+      }
+
     };
 
     const handleDelete = (id) => {
       deleteHabit(id);
     };
 
-    const handleUpdate = () => {
-      setModalVisible(true);
+    function handleUpdate() {
+      if (this._isMounted) {
+        this.setState({
+          ...this.state,
+          modalVisible: true
+        })
+      }
+
     };
 
     const handleComplete = (id) => {
