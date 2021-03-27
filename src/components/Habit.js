@@ -1,74 +1,139 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
+  Alert,
 } from "react-native";
 import { deleteHabit, completeHabit } from "../api/firebaseMethods";
 import { AntDesign, Feather, Entypo } from "@expo/vector-icons";
 import EditModal from "../screens/habitCRUD/EditModal";
-import { useStateIfMounted } from "use-state-if-mounted";
 
-const Habit = (props) => {
-  const {
-    title,
-    id,
-    details,
-    creationDate,
-    completed,
-    timesCompleted,
-    date,
-    drag,
-  } = props;
-
-  const [expanded, setExpanded] = useStateIfMounted(false);
-  const [modalVisible, setModalVisible] = useStateIfMounted(false);
-  const { titleStyle, idStyle, detailsStyle, buttonsHolder } = styles;
-
-  //modal display switch
-  const updateModalVisible = () => {
-    if (modalVisible) {
-      setModalVisible(false);
-    } else {
-      setModalVisible(true);
-    }
-  };
-
-  //habit display switch
-  const handleExpand = () => {
-    setExpanded(!expanded);
-  };
-
-  const handleDelete = (id) => {
-    deleteHabit(id);
-  };
-
-  const handleUpdate = () => {
-    setModalVisible(true);
-  };
-
-  const handleComplete = (id) => {
-    completeHabit(id, date);
-  };
-
-  let pluralizer = "s";
-  if (timesCompleted === 1) {
-    pluralizer = "";
+class Habit extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      expanded: false,
+      modalVisisble: false
+    };
   }
+  render() {
+    const {
+      title,
+      id,
+      details,
+      creationDate,
+      completed,
+      timesCompleted,
+      date,
+      drag,
+    } = this.props;
 
-  if (expanded) {
-    return (
-      <View style={styles.container}>
+    const { titleStyle, idStyle, detailsStyle, buttonsHolder } = styles;
+
+    //modal display switch
+    function updateModalVisible() {
+      if (modalVisible) {
+        this.setState({
+          ...this.state,
+          modalVisible: false
+        })
+      } else {
+        this.setState({
+          ...this.state,
+          modalVisible: true
+        })
+      }
+    };
+
+    //habit display switch
+    function handleExpand() {
+      this.setState({
+        ...this.state,
+        expanded: !this.state.expanded
+      })
+    };
+
+    const handleDelete = (id) => {
+      deleteHabit(id);
+    };
+
+    const handleUpdate = () => {
+      setModalVisible(true);
+    };
+
+    const handleComplete = (id) => {
+      completeHabit(id, date);
+    };
+
+    let pluralizer = "s";
+    if (timesCompleted === 1) {
+      pluralizer = "";
+    }
+
+    if (this.state.expanded) {
+      return (
+        <View style={styles.container}>
         <Text style={titleStyle}>{title}</Text>
-        <View style={buttonsHolder}>
+          <View style={buttonsHolder}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleComplete(id)}
+            >
+              <AntDesign name="checkcircleo" size={24} color="green" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleExpand()}
+            >
+              <Entypo name="add-to-list" size={24} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleUpdate(id, title, details)}
+            >
+              <Feather name="edit" size={24} color="blue" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => handleDelete(id)}
+            >
+              <AntDesign name="close" size={24} color="red" />
+            </TouchableOpacity>
+          </View>
+          <Text style={idStyle}>ID: {id}</Text>
+          <Text style={idStyle}>Creation Date: {creationDate}</Text>
+          <Text style={detailsStyle}>{details}</Text>
+          <Text style={idStyle}>{completed ? "Complete" : "Incomplete"}</Text>
+          <Text
+            style={detailsStyle}
+          >{`Completed ${timesCompleted} time${pluralizer}`}</Text>
+
+          <EditModal
+            id={id}
+            title={title}
+            details={details}
+            modalVisible={modalVisible}
+            updateModalVisible={() => {
+              updateModalVisible();
+            }}
+          />
+        </View>
+      );
+    } else {
+      return (
+        <View
+          style={[styles.smallContainer, { flexDirection: "row" }]}
+        >
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleComplete(id)}
           >
             <AntDesign name="checkcircleo" size={24} color="green" />
           </TouchableOpacity>
+          <Text style={titleStyle}>{title}</Text>
           <TouchableOpacity
             style={styles.button}
             onPress={() => handleExpand()}
@@ -77,56 +142,16 @@ const Habit = (props) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => handleUpdate(id, title, details)}
+            onPressIn={drag}
           >
-            <Feather name="edit" size={24} color="blue" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => handleDelete(id)}
-          >
-            <AntDesign name="close" size={24} color="red" />
+            <Entypo name="dots-three-vertical" size={24} color="black" />
           </TouchableOpacity>
         </View>
-        <Text style={idStyle}>ID: {id}</Text>
-        <Text style={idStyle}>Creation Date: {creationDate}</Text>
-        <Text style={detailsStyle}>{details}</Text>
-        <Text style={idStyle}>{completed ? "Complete" : "Incomplete"}</Text>
-        <Text
-          style={detailsStyle}
-        >{`Completed ${timesCompleted} time${pluralizer}`}</Text>
+      );
+    }
+  };
+}
 
-        <EditModal
-          id={id}
-          title={title}
-          details={details}
-          modalVisible={modalVisible}
-          updateModalVisible={() => {
-            updateModalVisible();
-          }}
-        />
-      </View>
-    );
-  } else {
-    return (
-      <View style={[styles.smallContainer, { flexDirection: "row" }]}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => handleComplete(id)}
-        >
-          <AntDesign name="checkcircleo" size={24} color="green" />
-        </TouchableOpacity>
-        <Text style={titleStyle}>{title}</Text>
-        <TouchableOpacity style={styles.button} onPress={() => handleExpand()}>
-          <Entypo name="add-to-list" size={24} color="black" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPressIn={drag}>
-          <Entypo name="dots-three-vertical" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-    );
-  }
-};
 
 const styles = StyleSheet.create({
   container: {
